@@ -1558,7 +1558,7 @@ export function _template (text, settings, oldSettings) {
 		index = offset + match.length;
 
 		if (escape) {
-			source += "'+\n((__t=(" + escape + "))==null?'':_escape(__t))+\n'";
+			source += "'+\n((__t=(" + escape + "))==null?'':(typeof _escape == 'function')?_escape(__t):_.escape(__t))+\n'";
 		} else if (interpolate) {
 			source += "'+\n((__t=(" + interpolate + "))==null?'':__t)+\n'";
 		} else if (evaluate) {
