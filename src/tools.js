@@ -1511,6 +1511,9 @@ export function _times (n, iteratee, context) {
 // `_.iteratee` if they want additional predicate/iteratee shorthand styles.
 // This abstraction hides the internal-only argCount argument.
 export var _iteratee = builtinIteratee;
+export function _setIteratee (fn) {
+	_iteratee = _isFunction(fn) ? fn : builtinIteratee;
+}
 
 // Return a random integer between min and max (inclusive).
 export function _random (min, max) {

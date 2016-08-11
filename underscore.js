@@ -1538,6 +1538,9 @@
 	// `_.iteratee` if they want additional predicate/iteratee shorthand styles.
 	// This abstraction hides the internal-only argCount argument.
 	var _iteratee = builtinIteratee;
+	function _setIteratee (fn) {
+		_iteratee = _isFunction(fn) ? fn : builtinIteratee;
+	}
 
 	// Return a random integer between min and max (inclusive).
 	function _random (min, max) {
@@ -1776,7 +1779,8 @@ var _tools = Object.freeze({
 		_matches: _matches,
 		_matcher: _matcher,
 		_times: _times,
-		_iteratee: _iteratee,
+		get _iteratee () { return _iteratee; },
+		_setIteratee: _setIteratee,
 		_random: _random,
 		_now: _now,
 		_escape: _escape,

@@ -696,13 +696,14 @@
 
     // Test custom iteratee
     var builtinIteratee = _.iteratee;
-    _.iteratee = function(value) {
+    // @TODO commit fixing "setting iteratee issue"
+    _.setIteratee( function(value) {
       // RegEx values return a function that returns the number of matches
       if (_.isRegExp(value)) return function(obj) {
         return (obj.match(value) || []).length;
       };
       return value;
-    };
+    });
 
     var collection = ['foo', 'bar', 'bbiz'];
 
@@ -730,7 +731,7 @@
     assert.deepEqual(_.mapObject(objCollection, /b/g), {a: 0, b: 1, c: 2});
 
     // Restore the builtin iteratee
-    _.iteratee = builtinIteratee;
+    _.setIteratee( builtinIteratee );
   });
 
   QUnit.test('restArgs', function(assert) {
