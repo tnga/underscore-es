@@ -5,3 +5,6 @@ node_modules
 *.swp
 nyc_output
 coverage
+/underscore_to_es6.js
+/src/partial/
+/.brackets.json
