@@ -1535,21 +1535,13 @@ export function _uniqueId (prefix) {
 	return prefix ? prefix + id : id;
 }
 
-// By default, Underscore uses ERB-style template delimiters, change the
-// following template settings to use alternative delimiters.
-export var _templateSettings = {
-	evaluate: /<%([\s\S]+?)%>/g,
-	interpolate: /<%=([\s\S]+?)%>/g,
-	escape: /<%-([\s\S]+?)%>/g
-};
-
 // JavaScript micro-templating, similar to John Resig's implementation.
 // Underscore templating handles arbitrary delimiters, preserves whitespace,
 // and correctly escapes quotes within interpolated code.
 // NB: `oldSettings` only exists for backwards compatibility.
 export function _template (text, settings, oldSettings) {
 	if (!settings && oldSettings) settings = oldSettings;
-	settings = _defaults({}, settings, _templateSettings);
+	settings = _defaults({}, settings, _template.settings);
 
 	// Combine delimiters into one regular expression via alternation.
 	let matcher = RegExp([
@@ -1603,3 +1595,10 @@ export function _template (text, settings, oldSettings) {
 
 	return template;
 }
+// By default, Underscore uses ERB-style template delimiters, change the
+// following template settings to use alternative delimiters.
+_template.settings = {
+	evaluate: /<%([\s\S]+?)%>/g,
+	interpolate: /<%=([\s\S]+?)%>/g,
+	escape: /<%-([\s\S]+?)%>/g
+};

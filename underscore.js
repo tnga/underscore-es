@@ -1566,21 +1566,13 @@
 		return prefix ? prefix + id : id;
 	}
 
-	// By default, Underscore uses ERB-style template delimiters, change the
-	// following template settings to use alternative delimiters.
-	var _templateSettings = {
-		evaluate: /<%([\s\S]+?)%>/g,
-		interpolate: /<%=([\s\S]+?)%>/g,
-		escape: /<%-([\s\S]+?)%>/g
-	};
-
 	// JavaScript micro-templating, similar to John Resig's implementation.
 	// Underscore templating handles arbitrary delimiters, preserves whitespace,
 	// and correctly escapes quotes within interpolated code.
 	// NB: `oldSettings` only exists for backwards compatibility.
 	function _template (text, settings, oldSettings) {
 		if (!settings && oldSettings) settings = oldSettings;
-		settings = _defaults({}, settings, _templateSettings);
+		settings = _defaults({}, settings, _template.settings);
 
 		// Combine delimiters into one regular expression via alternation.
 		let matcher = RegExp([
@@ -1634,6 +1626,13 @@
 
 		return template;
 	}
+	// By default, Underscore uses ERB-style template delimiters, change the
+	// following template settings to use alternative delimiters.
+	_template.settings = {
+		evaluate: /<%([\s\S]+?)%>/g,
+		interpolate: /<%=([\s\S]+?)%>/g,
+		escape: /<%-([\s\S]+?)%>/g
+	};
 
 var _tools = Object.freeze({
 		_: _$1,
@@ -1772,7 +1771,6 @@ var _tools = Object.freeze({
 		_unescape: _unescape,
 		_result: _result,
 		_uniqueId: _uniqueId,
-		_templateSettings: _templateSettings,
 		_template: _template
 	});
 

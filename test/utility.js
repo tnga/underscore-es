@@ -5,11 +5,11 @@
   QUnit.module('Utility', {
 
     beforeEach: function() {
-      templateSettings = _.clone(_.templateSettings);
+      templateSettings = _.clone(_.template.settings);
     },
 
     afterEach: function() {
-      _.templateSettings = templateSettings;
+      _.template.settings = templateSettings;
     }
 
   });
@@ -261,7 +261,7 @@
     );
     assert.equal(template({data: 12345}).replace(/\s/g, ''), '<li>24690</li>');
 
-    _.templateSettings = {
+    _.template.settings = {
       evaluate: /\{\{([\s\S]+?)\}\}/g,
       interpolate: /\{\{=([\s\S]+?)\}\}/g
     };
@@ -276,7 +276,7 @@
     quoteInStatementAndBody = _.template("{{ if(foo == 'bar'){ }}Statement quotes and 'quotes'.{{ } }}");
     assert.equal(quoteInStatementAndBody({foo: 'bar'}), "Statement quotes and 'quotes'.");
 
-    _.templateSettings = {
+    _.template.settings = {
       evaluate: /<\?([\s\S]+?)\?>/g,
       interpolate: /<\?=([\s\S]+?)\?>/g
     };
@@ -291,7 +291,7 @@
     quoteInStatementAndBody = _.template("<? if(foo == 'bar'){ ?>Statement quotes and 'quotes'.<? } ?>");
     assert.equal(quoteInStatementAndBody({foo: 'bar'}), "Statement quotes and 'quotes'.");
 
-    _.templateSettings = {
+    _.template.settings = {
       interpolate: /\{\{(.+?)\}\}/g
     };
 
@@ -361,19 +361,19 @@
     }), obj.a, 'called with context');
   });
 
-  QUnit.test('_.templateSettings.variable', function(assert) {
+  QUnit.test('_.template.settings.variable', function(assert) {
     var s = '<%=data.x%>';
     var data = {x: 'x'};
     var tmp = _.template(s, {variable: 'data'});
     assert.strictEqual(tmp(data), 'x');
-    _.templateSettings.variable = 'data';
+    _.template.settings.variable = 'data';
     assert.strictEqual(_.template(s)(data), 'x');
   });
 
-  QUnit.test('#547 - _.templateSettings is unchanged by custom settings.', function(assert) {
-    assert.notOk(_.templateSettings.variable);
+  QUnit.test('#547 - _.template.settings is unchanged by custom settings.', function(assert) {
+    assert.notOk(_.template.settings.variable);
     _.template('', {}, {variable: 'x'});
-    assert.notOk(_.templateSettings.variable);
+    assert.notOk(_.template.settings.variable);
   });
 
   QUnit.test('#556 - undefined template variables.', function(assert) {
