@@ -263,7 +263,7 @@ function createAssigner (keysFunc, defaults) {
 				l = keys.length;
 			for (let i = 0; i < l; i++) {
 				let key = keys[i];
-				if (!defaults || obj[key] === void 0) obj[key] = source[key];
+				if (_isObject(obj) && (!defaults || obj[key] === void 0)) obj[key] = source[key];
 			}
 		}
 		return obj;
