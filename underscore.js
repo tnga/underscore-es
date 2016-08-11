@@ -1,7 +1,12 @@
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
 	typeof define === 'function' && define.amd ? define(factory) :
-	(global._ = factory());
+	(function() {
+		var current = global._;
+		var exports = factory();
+		global._ = exports;
+		exports.noConflict = function() { global._ = current; return exports; };
+	})();
 }(this, function () { 'use strict';
 
 	// quick reference variables for speed access
@@ -26,17 +31,6 @@
 
 	// Naked function reference for surrogate-prototype-swapping.
 	var Ctor = function () {};
-
-	// Establish the root object, `window` (`self`) in the browser, `global`
-	// on the server, or `this` in some virtual machines. We use `self`
-	// instead of `window` for `WebWorker` support.
-	var root = typeof self == 'object' && self.self === self && self ||
-		typeof global == 'object' && global.global === global && global || undefined;
-
-	// Save the previous value of the `_` variable.
-	// @FUTURE will be deprecated with es6 popular usage and full support by browsers
-	var previousUnderscore = root._;
-
 
 	// Baseline setup
 	function _$1 (obj) {
@@ -420,7 +414,7 @@
 	// Optimize `isFunction` if appropriate. Work around some typeof bugs in old v8,
 	// IE 11 (#1621), Safari 8 (#1929), and PhantomJS (#2236).
 	function customFunction () {
-		if (typeof /./ != 'function' && typeof Int8Array != 'object' && typeof (root.document && root.document.childNodes) != 'function') {
+		if (typeof /./ != 'function' && typeof Int8Array != 'object' && typeof document !== 'undefined' && typeof document.childNodes != 'function') {
 	    return function(obj) {
 	      return typeof obj == 'function' || false;
 	    };
@@ -1482,14 +1476,6 @@
 	// Utility Functions
 	// -----------------
 
-	// Run Underscore.js in *noConflict* mode, returning the `_` variable to its
-	// previous owner. Returns a reference to the Underscore object.
-	// @FUTURE will be deprecated with es6 popular usage and full support by browsers
-	function _noConflict () {
-		root._ = previousUnderscore;
-		return this;
-	}
-
 	// Keep the identity function around for default iteratees.
 	function _identity (value) {
 		return value;
@@ -1770,7 +1756,6 @@ var _tools = Object.freeze({
 		_before: _before,
 		_once: _once,
 		_restArgs: _restArgs,
-		_noConflict: _noConflict,
 		_identity: _identity,
 		_constant: _constant,
 		_noop: _noop,

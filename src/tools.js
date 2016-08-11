@@ -1,15 +1,5 @@
 import {ArrayProto, ObjProto, SymbolProto, push, slice, toString, hasOwnProperty, nativeIsArray, nativeKeys, nativeCreate, Ctor} from './_quickaccess';
 
-// Establish the root object, `window` (`self`) in the browser, `global`
-// on the server, or `this` in some virtual machines. We use `self`
-// instead of `window` for `WebWorker` support.
-var root = typeof self == 'object' && self.self === self && self ||
-	typeof global == 'object' && global.global === global && global || this;
-
-// Save the previous value of the `_` variable.
-// @FUTURE will be deprecated with es6 popular usage and full support by browsers
-var previousUnderscore = root._;
-
 
 // Baseline setup
 function _ (obj) {
@@ -393,7 +383,7 @@ function customArguments () {
 // Optimize `isFunction` if appropriate. Work around some typeof bugs in old v8,
 // IE 11 (#1621), Safari 8 (#1929), and PhantomJS (#2236).
 function customFunction () {
-	if (typeof /./ != 'function' && typeof Int8Array != 'object' && typeof (root.document && root.document.childNodes) != 'function') {
+	if (typeof /./ != 'function' && typeof Int8Array != 'object' && typeof document !== 'undefined' && typeof document.childNodes != 'function') {
     return function(obj) {
       return typeof obj == 'function' || false;
     };
@@ -1454,14 +1444,6 @@ export var _restArgs = restArgs;
 
 // Utility Functions
 // -----------------
-
-// Run Underscore.js in *noConflict* mode, returning the `_` variable to its
-// previous owner. Returns a reference to the Underscore object.
-// @FUTURE will be deprecated with es6 popular usage and full support by browsers
-export function _noConflict () {
-	root._ = previousUnderscore;
-	return this;
-}
 
 // Keep the identity function around for default iteratees.
 export function _identity (value) {
