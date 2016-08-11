@@ -27,6 +27,7 @@
     "pretty-bytes-cli": "^1.0.0",
     "qunit-cli": "~0.2.0",
     "qunitjs": "^1.18.0",
+    "rollup": "^0.34.7",
     "uglify-js": "2.4.x"
   },
   "scripts": {
@@ -36,8 +37,9 @@
     "lint": "eslint underscore.js test/*.js",
     "test-node": "qunit-cli test/*.js",
     "test-browser": "npm i karma-phantomjs-launcher && karma start",
-    "minify":  "uglifyjs underscore.js -c \"evaluate=false\" --comments \"/    .*/\" -m",
-    "build": "npm run minify -- --source-map underscore-min.map --source-map-url \" \" -o underscore-min.js",
+    "rollup": "rollup -c",
+    "minify": "uglifyjs underscore.js -c \"evaluate=false\" --comments \"/    .*/\" -m",
+    "build": "npm run rollup && npm run minify -- --source-map underscore-min.map --source-map-url \" \" -o underscore-min.js",
     "doc": "docco underscore.js",
     "weight": "npm run minify | gzip-size | pretty-bytes"
   },
