@@ -13,24 +13,24 @@
 	//-------------------------------------------
 
 	// Save bytes in the minified (but not gzipped) version:
-	var ArrayProto = Array.prototype;
-	var ObjProto = Object.prototype;
-	var SymbolProto = typeof Symbol !== 'undefined' ? Symbol.prototype : null;
+	const ArrayProto = Array.prototype;
+	const ObjProto = Object.prototype;
+	const SymbolProto = typeof Symbol !== 'undefined' ? Symbol.prototype : null;
 
 	// Create quick reference variables for speed access to core prototypes.
-	var push = ArrayProto.push;
-	var slice = ArrayProto.slice;
-	var toString = ObjProto.toString;
-	var hasOwnProperty = ObjProto.hasOwnProperty;
+	const push = ArrayProto.push;
+	const slice = ArrayProto.slice;
+	const toString = ObjProto.toString;
+	const hasOwnProperty = ObjProto.hasOwnProperty;
 
 	// All **ECMAScript 5** native function implementations that we hope to use
 	// are declared here.
-	var nativeIsArray = Array.isArray;
-	var nativeKeys = Object.keys;
-	var nativeCreate = Object.create;
+	const nativeIsArray = Array.isArray;
+	const nativeKeys = Object.keys;
+	const nativeCreate = Object.create;
 
 	// Naked function reference for surrogate-prototype-swapping.
-	var Ctor = function () {};
+	const Ctor = function () {};
 
 	// Baseline setup
 	function _$1 (obj) {
