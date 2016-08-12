@@ -8,7 +8,7 @@ var _ = _tools._;
 // each native function start with _ so it will be removed 
 // because the gold is to have `_[.function]` not `_[._function]`
 let natifyMixin = function (obj) {
-	_tools._each(_tools._functions(obj), function (name) {
+	_tools._each(_tools._functions(obj), (name) => {
 		if (name !== '_' || name !== 'default') _[name.slice(1)] = obj[name];
 	});
 	return _;
@@ -30,13 +30,11 @@ _.chain = function (obj) {
 // underscore functions. Wrapped objects may be chained.
 
 // Helper function to continue chaining intermediate results.
-var chainResult = function (instance, obj) {
-	return instance._chain ? _(obj).chain() : obj;
-};
+var chainResult = (instance, obj) => instance._chain ? _(obj).chain() : obj;
 
 // Add your own custom functions to the Underscore object.
 _.mixin = function (obj) {
-	_.each(_.functions(obj), function (name) {
+	_.each(_.functions(obj), (name) => {
 		let func = _[name] = obj[name];
 		_.prototype[name] = function () {
 			let args = [this._wrapped];
@@ -51,7 +49,7 @@ _.mixin = function (obj) {
 _.mixin(_);
 
 // Add all mutator Array functions to the wrapper.
-_.each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], function (name) {
+_.each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], (name) => {
 	var method = Array.prototype[name];
 	_.prototype[name] = function () {
 		var obj = this._wrapped;
@@ -62,7 +60,7 @@ _.each(['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift'], functio
 });
 
 // Add all accessor Array functions to the wrapper.
-_.each(['concat', 'join', 'slice'], function (name) {
+_.each(['concat', 'join', 'slice'], (name) => {
 	var method = Array.prototype[name];
 	_.prototype[name] = function () {
 		return chainResult(this, method.apply(this._wrapped, arguments));
