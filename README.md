@@ -31,6 +31,7 @@ import {_template} from 'underscore-es';
 
  ```js
  import _ from 'underscore-es';
+ 
  _.chain([4,7])
   .union([7,0,3])
   .initial()
@@ -43,7 +44,7 @@ import {_template} from 'underscore-es';
 
  Since this underscore source code has been rewritten to be more es6 friendly,
  the `_.templateSettings` property is now `_.template.settings` and the `_.iteratee` 
- shall now *(for global importation)* be overwritten through `_.setIteratee( [fn] )` method.
+ shall now *(for global importation)* be overwritten through `_.setIteratee([fn])` method.
  
 [Documentation](https://tnga.github.io/underscore-es) is the to find what you need to know !
 
