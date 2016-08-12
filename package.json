@@ -1,6 +1,6 @@
 {
-  "name": "underscore",
-  "description": "JavaScript's functional programming helper library.",
+  "name": "underscore-es",
+  "description": "javaScript's functional programming helper library ; even for ES6 and beyond.",
   "homepage": "http://underscorejs.org",
   "keywords": [
     "util",
@@ -12,9 +12,11 @@
   "author": "Jeremy Ashkenas <jeremy@documentcloud.org>",
   "repository": {
     "type": "git",
-    "url": "git://github.com/jashkenas/underscore.git"
+    "url": "git://github.com/tnga/underscore-es.git"
   },
   "main": "underscore.js",
+  "module": "src/index.js",
+  "jsnext:main": "src/index.js",
   "version": "1.8.3",
   "devDependencies": {
     "babel": "^6.5.2",
@@ -55,6 +57,7 @@
   "license": "MIT",
   "files": [
     "underscore.js",
+    "underscore.js.map",
     "underscore-min.js",
     "underscore-min.map"
   ]
