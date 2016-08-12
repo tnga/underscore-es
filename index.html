@@ -1842,7 +1842,10 @@ _.isUndefined(window.missingVariable);
         <b class="header">noConflict</b><code>_.noConflict()</code>
         <br />
         Give control of the <tt>_</tt> variable back to its previous owner. Returns
-        a reference to the <b>Underscore</b> object.
+        a reference to the <b>Underscore</b> object. <span style="color:red">Since underscore source 
+        code has been rewritten to be more es6 friendly, this function isn't available in 
+        es6, cjs and amd format (it isn't really necessary in that case). So it is only
+        available in global/iife format</span>:
       </p>
       <pre>
 var underscore = _.noConflict();
@@ -1960,15 +1963,22 @@ _.iteratee('firstName');
 
       <p>
         You may overwrite <tt>_.iteratee</tt> with your own custom function,
-        if you want additional or different shorthand syntaxes:
+        if you want additional or different shorthand syntaxes. 
+        <span style="color:red">Since underscore source code has been rewritten 
+        to be more es6 friendly, the overwriting of this function is only considered or effective 
+        when it is done through <tt>_.setIteratee</tt></span>:
       </p>
       <pre>
 // Support `RegExp` predicate shorthand.
 var builtinIteratee = _.iteratee;
-_.iteratee = function(value, context) {
+_.setIteratee( function(value, context) {
   if (_.isRegExp(value)) return function(obj) { return value.test(obj) };
   return builtinIteratee(value, context);
-};</pre>
+} );
+
+// actually, with the official underscore lib (no es6 friendly)
+// you will directly overwrite <tt>_.iteratee</tt> instead. (<tt>_.setIteratee</tt> isn't available)
+     </pre>
       <p id="uniqueId">
         <b class="header">uniqueId</b><code>_.uniqueId([prefix])</code>
         <br />
@@ -2041,8 +2051,9 @@ _.now();
         <tt>&lt;% &hellip; %&gt;</tt>. If you wish to interpolate a value, and have
         it be HTML-escaped, use <tt>&lt;%- &hellip; %&gt;</tt>. When you evaluate a
         template function, pass in a <b>data</b> object that has properties
-        corresponding to the template's free variables. The <b>settings</b> argument
-        should be a hash containing any <tt>_.templateSettings</tt> that should be overridden.
+        corresponding to the template's free variables. <span style="color:red">Since underscore
+        source code has been rewritten to be more es6 friendly, the <b>settings</b> argument
+        should be a hash containing any <tt>_.template.settings</tt> that should be overridden</span>.
       </p>
 
       <pre>
@@ -2078,7 +2089,9 @@ compiled({epithet: "stooge"});
       </p>
 
       <pre>
-_.templateSettings = {
+// actually, with the official underscore lib (no es6 friendly)
+// you may use <tt>_.templateSettings</tt> instead
+_.template.settings = {
   interpolate: /\{\{(.+?)\}\}/g
 };
 
