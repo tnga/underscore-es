@@ -17,7 +17,7 @@
   "main": "underscore.js",
   "module": "src/index.js",
   "jsnext:main": "src/index.js",
-  "version": "1.8.3",
+  "version": "1.8.3-r0",
   "devDependencies": {
     "babel": "^6.5.2",
     "babel-cli": "^6.11.4",
