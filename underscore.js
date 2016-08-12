@@ -395,7 +395,7 @@
   	} else {
   		// Deep compare objects.
   		var keys = _$1.keys(a),
-  		    key;
+  		    key = void 0;
   		length = keys.length;
   		// Ensure that both objects contain the same number of properties before comparing deep equality.
   		if (_$1.keys(b).length !== length) return false;
@@ -487,7 +487,8 @@
   // sparse array-likes as if they were dense.
   function _forEach(obj, iteratee, context) {
   	iteratee = optimizeCb(iteratee, context);
-  	var i, length;
+  	var i = void 0,
+  	    length = void 0;
   	if (isArrayLike(obj)) {
   		for (i = 0, length = obj.length; i < length; i++) {
   			iteratee(obj[i], i, obj);
