@@ -8,4 +8,4 @@ coverage
 /underscore_to_es6.js
 /.brackets.json
 /.nyc_output/
-/_testy_es6.js
+/_testy*.js
