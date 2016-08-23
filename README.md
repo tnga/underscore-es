@@ -50,8 +50,8 @@ import _template from 'underscore-es/template';
  import _template from 'underscore-es/template';
  
  _template.settings = {
-   evaluate: /\{\{([\s\S]+?)\}\}/g,
-   interpolate: /\{\{=([\s\S]+?)\}\}/g
+    evaluate: /\{\{([\s\S]+?)\}\}/g,
+    interpolate: /\{\{=([\s\S]+?)\}\}/g
  };
 
  var custom = _template('<ul>{{ for (var key in people) { }}<li>{{= people[key] }}</li>{{ } }}</ul>');
@@ -68,11 +68,11 @@ import _template from 'underscore-es/template';
  import _filter from './underscore-es/filter';
  
  _setIteratee( function(value) {
-   // RegEx values return a function that returns the number of matches
-   if (_isRegExp(value)) return function(obj) {
-      return (obj.match(value) || []).length;
-   };
-   return value;
+    // RegEx values return a function that returns the number of matches
+    if (_isRegExp(value)) return function(obj) {
+       return (obj.match(value) || []).length;
+    };
+    return value;
  });
 
  // test some methods that claim to be transformed through `_iteratee`
