@@ -124,10 +124,33 @@
   	return toString.call(obj) === '[object Array]';
   };
 
+  // `_isFunction` : an object's function
+  // -------------------------------------
+
+  // Optimize `isFunction` if appropriate. Work around some typeof bugs in old v8,
+  // IE 11 (#1621), Safari 8 (#1929), and PhantomJS (#2236).
+  function customFunction() {
+  	if (typeof /./ != 'function' && (typeof Int8Array === 'undefined' ? 'undefined' : _typeof(Int8Array)) != 'object' && typeof document !== 'undefined' && typeof document.childNodes != 'function') {
+  		return function (obj) {
+  			return typeof obj == 'function' || false;
+  		};
+  	}
+  	return null;
+  }
+
   // Is a given value a function?
   var _isFunction = customFunction() || function (obj) {
   	return toString.call(obj) === '[object Function]';
   };
+
+  // Define a fallback version of the method in browsers (ahem, IE < 9), where
+  // there isn't any inspectable "Arguments" type.
+  function customArguments() {
+  	if (toString.call(arguments) === '[object Arguments]') return null;
+  	return function (obj) {
+  		return _has(obj, 'callee');
+  	};
+  }
 
   // Is a given value an arguments object?
   var _isArguments = customArguments() || function (obj) {
@@ -246,7 +269,6 @@
   // An internal function to generate callbacks that can be applied to each
   // element in a collection, returning the desired result — either `identity`,
   // an arbitrary callback, a property matcher, or a property accessor.
-  // @TODO change _property to property
   function cb(value, context, argCount) {
   	if (_iteratee !== builtinIteratee) return _iteratee(value, context);
   	if (value == null) return _identity;
@@ -574,26 +596,6 @@
   	aStack.pop();
   	bStack.pop();
   	return true;
-  }
-
-  // Define a fallback version of the method in browsers (ahem, IE < 9), where
-  // there isn't any inspectable "Arguments" type.
-  function customArguments() {
-  	if (toString$1.call(arguments) === '[object Arguments]') return null;
-  	return function (obj) {
-  		return _has(obj, 'callee');
-  	};
-  }
-
-  // Optimize `isFunction` if appropriate. Work around some typeof bugs in old v8,
-  // IE 11 (#1621), Safari 8 (#1929), and PhantomJS (#2236).
-  function customFunction() {
-  	if (typeof /./ != 'function' && (typeof Int8Array === 'undefined' ? 'undefined' : _typeof(Int8Array)) != 'object' && typeof document !== 'undefined' && typeof document.childNodes != 'function') {
-  		return function (obj) {
-  			return typeof obj == 'function' || false;
-  		};
-  	}
-  	return null;
   }
 
   // can be use to keep surrogate pair characters together (see `toArray` function for usage example)
