@@ -1,3 +1,9 @@
+//     Underscore.js for ES6 and beyond usage !
+//     http://underscorejs.org
+//     (c) 2009-2016 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+//		 (c) 2016 Tindo N. Arsel <devtnga@gmail.com>
+
+
 import {ArrayProto, push} from './_quickaccess';
 import * as collectionTools from './_collections';
 import * as arrayTools from './_arrays';
