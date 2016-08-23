@@ -49,7 +49,7 @@
     "test-node": "qunit-cli test/*.js",
     "test-browser": "npm i karma-phantomjs-launcher && karma start",
     "rollup": "rollup --no-conflict -c",
-    "grouping": "./grouptool",
+    "grouping": "./grouptools",
     "minify": "uglifyjs underscore.js -c \"evaluate=false\" --comments \"/    .*/\" -m",
     "build": "npm run rollup && npm run minify -- --source-map underscore-min.map --source-map-url \" \" -o underscore-min.js",
     "doc": "docco underscore.js",
