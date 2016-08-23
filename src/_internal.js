@@ -372,22 +372,6 @@ export function deepEq (a, b, aStack, bStack) {
 	return true;
 }
 
-// Define a fallback version of the method in browsers (ahem, IE < 9), where
-// there isn't any inspectable "Arguments" type.
-export function customArguments () {
-	if (toString.call(arguments) === '[object Arguments]') return null;
-	return (obj) => _has(obj, 'callee');
-}
-
-// Optimize `isFunction` if appropriate. Work around some typeof bugs in old v8,
-// IE 11 (#1621), Safari 8 (#1929), and PhantomJS (#2236).
-export function customFunction() {
-	if (typeof /./ != 'function' && typeof Int8Array != 'object' && typeof document !== 'undefined' && typeof document.childNodes != 'function') {
-		return (obj) => typeof obj == 'function' || false;
-	}
-	return null;
-}
-
 // can be use to keep surrogate pair characters together (see `toArray` function for usage example)
 export var reStrSymbol = /[^\ud800-\udfff]|[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff]/g;
 
