@@ -1,0 +1,91 @@
+#!/usr/bin/env node
+
+/* useful hack to automatically group underscore features in the corresponding category
+ ________________________________________________________________________________________
+*/
+
+var fs = require('fs');
+var path = require('path');
+
+var srcPath = path.join('.', 'src');
+
+var collectionTools = '',
+		arrayTools = '',
+		objectTools = '',
+		functionTools = '',
+		utilityTools = '';
+var counter = 0;
+
+fs.readdir(srcPath, function (err, files) {
+
+	if (err) throw err;
+
+	files.forEach( function (fileName) {
+
+		fs.lstat(path.join(srcPath, fileName), function (err, stats) {
+
+			if (!stats.isDirectory()) {
+				
+				counter++;
+
+				fs.readFile(path.join(srcPath, fileName), 'utf8', function (err, content) {
+
+					counter--;
+					
+					if (err) {
+
+						console.warn("can not read " + path.join(srcPath, fileName));
+					}
+					else {
+						
+						var toolName = fileName.replace('.js', '') ;
+
+						if (content.indexOf("a collection's function") !== -1) collectionTools += '\nexport {default as _'+ toolName +'} from \'./'+ toolName +'\';';
+						if (content.indexOf("an array's function") !== -1) arrayTools += '\nexport {default as _'+ toolName +'} from \'./'+ toolName +'\';';
+						if (content.indexOf("an object's function") !== -1) objectTools += '\nexport {default as _'+ toolName +'} from \'./'+ toolName +'\';';
+						if (content.indexOf("a function's function") !== -1) functionTools += '\nexport {default as _'+ toolName +'} from \'./'+ toolName +'\';';
+						if (content.indexOf("an utility's function") !== -1) {
+							utilityTools += '\nexport {default as _'+ toolName +'} from \'./'+ toolName +'\';';
+							if (toolName === 'iteratee') utilityTools += '\nexport {_setIteratee} from \'./'+ toolName +'\';';
+						}
+						
+						if (counter === 0 ) {
+							
+							// group tools in corresponding category files
+							fs.writeFile(path.join(srcPath, '_collections.js'),
+								'// Collection Functions \n// -------------------- \n'+ collectionTools,
+								function (err) {
+									if (err) throw err;
+								}
+							);
+							fs.writeFile(path.join(srcPath, '_arrays.js'),
+								'// Array Functions \n// --------------- \n'+ arrayTools,
+								function (err) {
+									if (err) throw err;
+								}
+							);
+							fs.writeFile(path.join(srcPath, '_objects.js'),
+								'// Object Functions \n// ---------------- \n'+ objectTools,
+								function (err) {
+									if (err) throw err;
+								}
+							);
+							fs.writeFile(path.join(srcPath, '_functions.js'),
+								'// Function (ahem) Functions \n// ------------------------- \n'+ functionTools,
+								function (err) {
+									if (err) throw err;
+								}
+							);
+							fs.writeFile(path.join(srcPath, '_utilities.js'),
+								'// Utility Functions \n// ----------------- \n'+ utilityTools,
+								function (err) {
+									if (err) throw err;
+								}
+							);
+						}
+					}
+				});
+			}
+		});
+	});
+});
