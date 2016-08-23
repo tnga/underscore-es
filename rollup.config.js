@@ -3,6 +3,7 @@ import babel from 'rollup-plugin-babel';
 export default {
 	entry: 'src/_namespace.js',
 	sourceMap: true,
+	noConflict: true,
 	moduleName: '_',
 	format: 'umd',
 	plugins: [babel()],
