@@ -1,7 +1,7 @@
 import babel from 'rollup-plugin-babel';
 
 export default {
-	entry: 'src/namespace.js',
+	entry: 'src/_namespace.js',
 	sourceMap: true,
 	moduleName: '_',
 	format: 'umd',
