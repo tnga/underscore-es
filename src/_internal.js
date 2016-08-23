@@ -14,7 +14,6 @@ import _has from './has';
 import _iteratee from './iteratee';
 import _identity from './identity';
 import _matcher from './matcher';
-import _property from './property';
 import _ from './_base';
 import {ObjProto, SymbolProto, slice, toString, nativeCreate, Ctor} from './_quickaccess';
 
@@ -45,13 +44,12 @@ export function builtinIteratee (value, context) {
 // An internal function to generate callbacks that can be applied to each
 // element in a collection, returning the desired result — either `identity`,
 // an arbitrary callback, a property matcher, or a property accessor.
-// @TODO change _property to property
 export function cb (value, context, argCount) {
 	if (_iteratee !== builtinIteratee) return _iteratee(value, context);
 	if (value == null) return _identity;
 	if (_isFunction(value)) return optimizeCb(value, context, argCount);
 	if (_isObject(value)) return _matcher(value);
-	return _property(value);
+	return property(value);
 }
 
 // Similar to ES6's rest param (http://ariya.ofilabs.com/2013/03/es6-and-rest-parameter.html)
