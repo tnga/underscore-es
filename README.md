@@ -20,7 +20,7 @@ without extending any core JavaScript objects.
  (*__nb__: only `_chain` isn't available in this case*)
 
  ```js
-import {_template} from 'underscore-es';
+import _template from 'underscore-es/template';
 
  var basicTemplate = _template("Ok, i use <%= builder %> for my es6 and beyond stuff !");
  var result = basicTemplate({builder: 'rollup'});
@@ -42,11 +42,48 @@ import {_template} from 'underscore-es';
  ```
 - breaking changes
 
- Since this underscore source code has been rewritten to be more es6 friendly,
- the `_.templateSettings` property is now `_.template.settings` and the `_.iteratee` 
- shall now *(for global importation)* be overwritten through `_.setIteratee([fn])` method.
+ Since this underscore source code has been rewritten to be more es6 friendly :
  
-[Documentation](https://tnga.github.io/underscore-es) is the to find what you need to know !
+ *the `_.templateSettings` property is now `_.template.settings`*
+ 
+ ```js
+ import _template from 'underscore-es/template';
+ 
+ _template.settings = {
+   evaluate: /\{\{([\s\S]+?)\}\}/g,
+   interpolate: /\{\{=([\s\S]+?)\}\}/g
+ };
+
+ var custom = _template('<ul>{{ for (var key in people) { }}<li>{{= people[key] }}</li>{{ } }}</ul>');
+ var result = custom({people: {moe: 'Moe', larry: 'Larry', curly: 'Curly'}});
+ console.log( result );
+ //=> <ul><li>Moe</li><li>Larry</li><li>Curly</li></ul>
+ ```
+ *the `_.iteratee` shall now (for global importation) be overwritten through `_.setIteratee([fn])` method*
+ ```js
+ import _iteratee from './underscore-es/iteratee';
+ import _setIteratee from './underscore-es/iteratee';
+ import _countBy from './underscore-es/countBy';
+ import _isRegExp from './underscore-es/isRegExp';
+ import _filter from './underscore-es/filter';
+ 
+ _setIteratee( function(value) {
+   // RegEx values return a function that returns the number of matches
+   if (_isRegExp(value)) return function(obj) {
+      return (obj.match(value) || []).length;
+   };
+   return value;
+ });
+
+ // test some methods that claim to be transformed through `_iteratee`
+ var collection = ['foo', 'bar', 'bbiz'];
+ console.log(_countBy(collection, /b/g))
+ //=> {0: 1, 1: 1, 2: 1}
+ console.log(_filter(collection, /b/g))
+ //=> ['bar', 'bbiz']
+ ```
+ 
+[Documentation](https://tnga.github.io/underscore-es) is the place to find what you need to know !
 
 This project adheres to a [code of conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
 
