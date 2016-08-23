@@ -1,20 +1,29 @@
 import {ArrayProto, push} from './_quickaccess';
-import * as _tools from './tools';
+import * as collectionTools from './_collections';
+import * as arrayTools from './_arrays';
+import * as objectTools from './_objects';
+import * as functionTools from './_functions';
+import * as utilityTools from './_utilities';
+import __ from './_base';
 
 // Baseline setup
 // --------------
-var _ = _tools._;
+var _ = __;
 // will help to add underscore's natives functions to the Underscore object.
 // each native function start with _ so it will be removed 
 // because the gold is to have `_[.function]` not `_[._function]`
 let natifyMixin = function (obj) {
-	_tools._each(_tools._functions(obj), (name) => {
-		if (name !== '_' || name !== 'default') _[name.slice(1)] = obj[name];
+	collectionTools._each( objectTools._functions(obj), (name) => {
+		_[name.slice(1)] = obj[name];
 	});
 	return _;
 };
 // Add underscore's natives functions to the Underscore object.
-natifyMixin(_tools);
+natifyMixin( collectionTools );
+natifyMixin( arrayTools );
+natifyMixin( objectTools );
+natifyMixin( functionTools );
+natifyMixin( utilityTools );
 
 // Add a "chain" function. Start chaining a wrapped Underscore object.
 _.chain = function (obj) {
