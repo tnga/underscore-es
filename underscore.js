@@ -25,7 +25,7 @@
   // Create quick reference variables for speed access to core prototypes.
   var push = ArrayProto.push;
   var slice = ArrayProto.slice;
-  var toString = ObjProto.toString;
+  var toString$1 = ObjProto.toString;
   var hasOwnProperty = ObjProto.hasOwnProperty;
 
   // All **ECMAScript 5** native function implementations that we hope to use
@@ -43,6 +43,165 @@
     return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
   };
 
+  // `_isObject` : an object's function
+  // -----------------------------------
+
+  // Is a given variable an object?
+  function _isObject (obj) {
+  	var type = typeof obj === 'undefined' ? 'undefined' : _typeof(obj);
+  	return type === 'function' || type === 'object' && !!obj;
+  }
+
+  // Shortcut function for checking if an object has a given property directly
+  // on itself (in other words, not on a prototype).
+  function _has (obj, key) {
+  	return obj != null && hasOwnProperty.call(obj, key);
+  }
+
+  // Handles raw objects in addition to array-likes. Treats all
+  // sparse array-likes as if they were dense.
+  function _each (obj, iteratee, context) {
+  	iteratee = optimizeCb(iteratee, context);
+  	var i = void 0,
+  	    length = void 0;
+  	if (isArrayLike(obj)) {
+  		for (i = 0, length = obj.length; i < length; i++) {
+  			iteratee(obj[i], i, obj);
+  		}
+  	} else {
+  		var keys = _keys(obj);
+  		for (i = 0, length = keys.length; i < length; i++) {
+  			iteratee(obj[keys[i]], keys[i], obj);
+  		}
+  	}
+  	return obj;
+  }
+
+  // Returns the first index on an array-like that passes a predicate test.
+  var _findIndex = createPredicateIndexFinder(1);
+
+  // Use a comparator function to figure out the smallest index at which
+  // an object should be inserted so as to maintain order. Uses binary search.
+  function _sortedIndex (array, obj, iteratee, context) {
+  	iteratee = cb(iteratee, context, 1);
+  	var value = iteratee(obj);
+  	var low = 0,
+  	    high = getLength(array);
+  	while (low < high) {
+  		var mid = Math.floor((low + high) / 2);
+  		if (iteratee(array[mid]) < value) low = mid + 1;else high = mid;
+  	}
+  	return low;
+  }
+
+  // Return the position of the first occurrence of an item in an array,
+  // or -1 if the item is not included in the array.
+  // If the array is large and already in sort order, pass `true`
+  // for **isSorted** to use binary search.
+  var _indexOf = createIndexFinder(1, _findIndex, _sortedIndex);
+
+  // Retrieve the values of an object's properties.
+  function _values (obj) {
+  	var keys = _keys(obj);
+  	var length = keys.length;
+  	var values = Array(length);
+  	for (var i = 0; i < length; i++) {
+  		values[i] = obj[keys[i]];
+  	}
+  	return values;
+  }
+
+  // Determine if the array or object contains a given item (using `===`).
+  function _contains (obj, item, fromIndex, guard) {
+  	if (!isArrayLike(obj)) obj = _values(obj);
+  	if (typeof fromIndex != 'number' || guard) fromIndex = 0;
+  	return _indexOf(obj, item, fromIndex) >= 0;
+  }
+
+  // Is a given value an array?
+  // Delegates to ECMA5's native Array.isArray
+  var _isArray = nativeIsArray || function (obj) {
+  	return toString.call(obj) === '[object Array]';
+  };
+
+  // Is a given value a function?
+  var _isFunction = customFunction() || function (obj) {
+  	return toString.call(obj) === '[object Function]';
+  };
+
+  // Is a given value an arguments object?
+  var _isArguments = customArguments() || function (obj) {
+  	return toString.call(obj) === '[object Arguments]';
+  };
+
+  // `_isNumber` : an object's function
+  // -----------------------------------
+
+  // Is a given value a number?
+  function _isNumber (obj) {
+  	return toString.call(obj) === '[object Number]';
+  }
+
+  // Is the given value `NaN`?
+  function _isNaN (obj) {
+  	return _isNumber(obj) && isNaN(obj);
+  }
+
+  // Invert the keys and values of an object. The values must be serializable.
+  function _invert (obj) {
+  	var result = {};
+  	var keys = _keys(obj);
+  	for (var i = 0, length = keys.length; i < length; i++) {
+  		result[obj[keys[i]]] = keys[i];
+  	}
+  	return result;
+  }
+
+  // External wrapper for our callback generator. Users may customize
+  // `_.iteratee` if they want additional predicate/iteratee shorthand styles.
+  // This abstraction hides the internal-only argCount argument.
+  var _iteratee = builtinIteratee;
+
+  function _setIteratee(fn) {
+  	_iteratee = _isFunction(fn) ? fn : builtinIteratee;
+  }
+
+  // `_identity` : an utility's function
+  // ------------------------------------
+
+  // Keep the identity function around for default iteratees.
+  function _identity (value) {
+  	return value;
+  }
+
+  // Extend a given object with the properties in passed-in object(s).
+  var _extendOwn = createAssigner(_keys);
+
+  // Returns whether an object has a given set of `key:value` pairs.
+  function _isMatch (object, attrs) {
+  	var keys = _keys(attrs),
+  	    length = keys.length;
+  	if (object == null) return !length;
+  	var obj = Object(object);
+  	for (var i = 0; i < length; i++) {
+  		var key = keys[i];
+  		if (attrs[key] !== obj[key] || !(key in obj)) return false;
+  	}
+  	return true;
+  }
+
+  // Returns a predicate for checking whether an object has a given set of
+  // `key:value` pairs.
+  function _matcher (attrs) {
+  	attrs = _extendOwn({}, attrs);
+  	return function (obj) {
+  		return _isMatch(obj, attrs);
+  	};
+  }
+
+  // `_` : base namespace and constructor for underscore's object
+  // -------------------------------------------------------------
+
   // Baseline setup
   function _$1(obj) {
   	if (obj instanceof _$1) return obj;
@@ -51,9 +210,6 @@
   }
   // Current version.
   _$1.VERSION = '1.8.3';
-
-  // @important: exportation of the function, not only it definition
-
 
   // Internal function that returns an efficient (for current engines) version
   // of the passed-in callback, to be repeatedly applied in other Underscore
@@ -90,6 +246,7 @@
   // An internal function to generate callbacks that can be applied to each
   // element in a collection, returning the desired result — either `identity`,
   // an arbitrary callback, a property matcher, or a property accessor.
+  // @TODO change _property to property
   function cb(value, context, argCount) {
   	if (_iteratee !== builtinIteratee) return _iteratee(value, context);
   	if (value == null) return _identity;
@@ -127,6 +284,7 @@
   }
 
   // An internal function for creating a new object that inherits from another.
+  // @TODO from quickaccess
   function baseCreate(prototype) {
   	if (!_isObject(prototype)) return {};
   	if (nativeCreate) return nativeCreate(prototype);
@@ -137,7 +295,7 @@
   }
 
   // An internal function used for get key's value from an object.
-  function property(key) {
+  function _property(key) {
   	return function (obj) {
   		return obj == null ? void 0 : obj[key];
   	};
@@ -148,8 +306,9 @@
   // Related: http://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength
   // Avoids a very nasty iOS 8 JIT bug on ARM-64. #2094
   var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
-  var getLength = property('length');
+  var getLength = _property('length');
   var isArrayLike = function isArrayLike(collection) {
+  	// @TODO simplify to function
   	var length = getLength(collection);
   	return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX;
   };
@@ -327,13 +486,14 @@
   }
 
   // Internal recursive comparison function for `isEqual`.
+  // @TODO from quickaccess
   function deepEq(a, b, aStack, bStack) {
   	// Unwrap any wrapped objects.
   	if (a instanceof _$1) a = a._wrapped;
   	if (b instanceof _$1) b = b._wrapped;
   	// Compare `[[Class]]` names.
-  	var className = toString.call(a);
-  	if (className !== toString.call(b)) return false;
+  	var className = toString$1.call(a);
+  	if (className !== toString$1.call(b)) return false;
   	switch (className) {
   		// Strings, numbers, regular expressions, dates, and booleans are compared by value.
   		case '[object RegExp]':
@@ -419,7 +579,7 @@
   // Define a fallback version of the method in browsers (ahem, IE < 9), where
   // there isn't any inspectable "Arguments" type.
   function customArguments() {
-  	if (toString.call(arguments) === '[object Arguments]') return null;
+  	if (toString$1.call(arguments) === '[object Arguments]') return null;
   	return function (obj) {
   		return _has(obj, 'callee');
   	};
@@ -485,32 +645,46 @@
   	return '\\' + escapes[match];
   }
 
-  // Collection Functions
-  // --------------------
-
-  // Handles raw objects in addition to array-likes. Treats all
-  // sparse array-likes as if they were dense.
-  function _forEach(obj, iteratee, context) {
-  	iteratee = optimizeCb(iteratee, context);
-  	var i = void 0,
-  	    length = void 0;
-  	if (isArrayLike(obj)) {
-  		for (i = 0, length = obj.length; i < length; i++) {
-  			iteratee(obj[i], i, obj);
-  		}
-  	} else {
-  		var keys = _keys(obj);
-  		for (i = 0, length = keys.length; i < length; i++) {
-  			iteratee(obj[keys[i]], keys[i], obj);
-  		}
-  	}
-  	return obj;
+  // Retrieve the names of an object's own properties.
+  // Delegates to **ECMAScript 5**'s native `Object.keys`.
+  function _keys (obj) {
+  	if (!_isObject(obj)) return [];
+  	if (nativeKeys) return nativeKeys(obj);
+  	var keys = [];
+  	for (var key in obj) {
+  		if (_has(obj, key)) keys.push(key);
+  	} // Ahem, IE < 9.
+  	if (hasEnumBug) collectNonEnumProps(obj, keys);
+  	return keys;
   }
-  // The cornerstone, an `each` implementation, aka `forEach`.
-  var _each = _forEach;
+
+  // Determine whether all of the elements match a truth test.
+  function every (obj, predicate, context) {
+  	predicate = cb(predicate, context);
+  	var keys = !isArrayLike(obj) && _keys(obj),
+  	    length = (keys || obj).length;
+  	for (var index = 0; index < length; index++) {
+  		var currentKey = keys ? keys[index] : index;
+  		if (!predicate(obj[currentKey], currentKey, obj)) return false;
+  	}
+  	return true;
+  }
+
+  // Determine if at least one element in the object matches a truth test.
+  // Aliased as `any`.
+  function some (obj, predicate, context) {
+  	predicate = cb(predicate, context);
+  	var keys = !isArrayLike(obj) && _keys(obj),
+  	    length = (keys || obj).length;
+  	for (var index = 0; index < length; index++) {
+  		var currentKey = keys ? keys[index] : index;
+  		if (predicate(obj[currentKey], currentKey, obj)) return true;
+  	}
+  	return false;
+  }
 
   // Return the results of applying the iteratee to each element.
-  function _collect(obj, iteratee, context) {
+  function _map (obj, iteratee, context) {
   	iteratee = cb(iteratee, context);
   	var keys = !isArrayLike(obj) && _keys(obj),
   	    length = (keys || obj).length,
@@ -521,30 +695,34 @@
   	}
   	return results;
   }
-  // The cornerstone, a `map` implementation, aka `collect`.
-  var _map = _collect;
 
-  // **Reduce** builds up a single result from a list of values, aka `inject`,
-  // or `foldl`.
-  var _inject = createReduce(1);
-  var _foldl = _inject;
-  var _reduce = _foldl;
+  // Counts instances of an object that group by a certain criterion. Pass
+  // either a string attribute to count by, or a function that returns the
+  // criterion.
+  var _countBy = group(function (result, value, key) {
+  	if (_has(result, key)) result[key]++;else result[key] = 1;
+  });
 
-  // The right-associative version of reduce, also known as `foldr`.
-  var _foldr = createReduce(-1);
-  var _reduceRight = _foldr;
+  // Returns the first key on an object that passes a predicate test.
+  function _findKey (obj, predicate, context) {
+  	predicate = cb(predicate, context);
+  	var keys = _keys(obj),
+  	    key = void 0;
+  	for (var i = 0, length = keys.length; i < length; i++) {
+  		key = keys[i];
+  		if (predicate(obj[key], key, obj)) return key;
+  	}
+  }
 
   // Return the first value which passes a truth test. Aliased as `detect`.
-  function _detect(obj, predicate, context) {
+  function _find (obj, predicate, context) {
   	var keyFinder = isArrayLike(obj) ? _findIndex : _findKey;
   	var key = keyFinder(obj, predicate, context);
   	if (key !== void 0 && key !== -1) return obj[key];
   }
-  // The cornerstone, a `find` implementation, aka `detect`.
-  var _find = _detect;
 
   // Return all the elements that pass a truth test.
-  function _select(obj, predicate, context) {
+  function _filter (obj, predicate, context) {
   	var results = [];
   	predicate = cb(predicate, context);
   	_each(obj, function (value, index, list) {
@@ -552,53 +730,45 @@
   	});
   	return results;
   }
-  // The cornerstone, a `filter` implementation, aka `select`.
-  var _filter = _select;
 
-  // Return all the elements for which a truth test fails.
-  function _reject(obj, predicate, context) {
-  	return _filter(obj, _negate(cb(predicate)), context);
+  // Convenience version of a common use case of `find`: getting the first object
+  // containing specific `key:value` pairs.
+  function findWhere (obj, attrs) {
+  	return _find(obj, _matcher(attrs));
   }
 
-  // Determine whether all of the elements match a truth test.
-  function _all(obj, predicate, context) {
-  	predicate = cb(predicate, context);
-  	var keys = !isArrayLike(obj) && _keys(obj),
-  	    length = (keys || obj).length;
-  	for (var index = 0; index < length; index++) {
-  		var currentKey = keys ? keys[index] : index;
-  		if (!predicate(obj[currentKey], currentKey, obj)) return false;
-  	}
-  	return true;
+  // Returns everything but the last entry of the array. Especially useful on
+  // the arguments object. Passing **n** will return all the values in
+  // the array, excluding the last N.
+  function _initial (array, n, guard) {
+  	return slice.call(array, 0, Math.max(0, array.length - (n == null || guard ? 1 : n)));
   }
-  // The cornerstone, a `every` implementation, aka `all`.
-  var _every = _all;
 
-  // Determine if at least one element in the object matches a truth test.
-  // Aliased as `any`.
-  function _any(obj, predicate, context) {
-  	predicate = cb(predicate, context);
-  	var keys = !isArrayLike(obj) && _keys(obj),
-  	    length = (keys || obj).length;
-  	for (var index = 0; index < length; index++) {
-  		var currentKey = keys ? keys[index] : index;
-  		if (predicate(obj[currentKey], currentKey, obj)) return true;
-  	}
-  	return false;
+  // Get the first element of an array. Passing **n** will return the first N
+  // values in the array. The **guard** check allows it to work with `_map`.
+  function take (array, n, guard) {
+  	if (array == null || array.length < 1) return void 0;
+  	if (n == null || guard) return array[0];
+  	return _initial(array, array.length - n);
   }
-  // The cornerstone, a `some` implementation, aka `any`.
-  var _some = _any;
 
-  // Determine if the array or object contains a given item (using `===`).
-  function _include(obj, item, fromIndex, guard) {
-  	if (!isArrayLike(obj)) obj = _values(obj);
-  	if (typeof fromIndex != 'number' || guard) fromIndex = 0;
-  	return _indexOf(obj, item, fromIndex) >= 0;
-  }
-  // The cornerstone, a `includes` implementation, aka `include`.
-  var _includes = _include;
-  // The cornerstone, a `contains` implementation, aka `include`.
-  var _contains = _include;
+  // **Reduce** builds up a single result from a list of values.
+  var _inject = createReduce(1);
+
+  // The right-associative version of reduce, also known as `foldr`
+  var _foldr = createReduce(-1);
+
+  // Groups the object's values by a criterion. Pass either a string attribute
+  // to group by, or a function that returns the criterion.
+  var _groupBy = group(function (result, value, key) {
+  	if (_has(result, key)) result[key].push(value);else result[key] = [value];
+  });
+
+  // Indexes the object's values by a criterion, similar to `groupBy`, but for
+  // when you know that your index values will be unique.
+  var _indexBy = group(function (result, value, key) {
+  	result[key] = value;
+  });
 
   // Invoke a method (with arguments) on every item in a collection.
   var _invoke = restArgs(function (obj, method, args) {
@@ -609,25 +779,8 @@
   	});
   });
 
-  // Convenience version of a common use case of `map`: fetching a property.
-  function _pluck(obj, key) {
-  	return _map(obj, _property(key));
-  }
-
-  // Convenience version of a common use case of `filter`: selecting only objects
-  // containing specific `key:value` pairs.
-  function _where(obj, attrs) {
-  	return _filter(obj, _matcher(attrs));
-  }
-
-  // Convenience version of a common use case of `find`: getting the first object
-  // containing specific `key:value` pairs.
-  function _findWhere(obj, attrs) {
-  	return _find(obj, _matcher(attrs));
-  }
-
   // Return the maximum element (or element-based computation).
-  function _max(obj, iteratee, context) {
+  function _max (obj, iteratee, context) {
   	var result = -Infinity,
   	    lastComputed = -Infinity,
   	    value = void 0,
@@ -654,7 +807,7 @@
   }
 
   // Return the minimum element (or element-based computation).
-  function _min(obj, iteratee, context) {
+  function min (obj, iteratee, context) {
   	var result = Infinity,
   	    lastComputed = Infinity,
   	    value,
@@ -680,16 +833,69 @@
   	return result;
   }
 
-  // Shuffle a collection.
-  function _shuffle(obj) {
-  	return _sample(obj, Infinity);
+  // Split a collection into two arrays: one whose elements all satisfy the given
+  // predicate, and one whose elements all do not satisfy the predicate.
+  var _partition = group(function (result, value, pass) {
+  	result[pass ? 0 : 1].push(value);
+  }, true);
+
+  // Convenience version of a common use case of `map`: fetching a property.
+  function _pluck (obj, key) {
+  	return _map(obj, _property(key));
+  }
+
+  // `_negate` : (ahem) a function's function
+  // -----------------------------------------
+
+  // Returns a negated version of the passed-in predicate.
+  function _negate (predicate) {
+    return function () {
+      return !predicate.apply(this, arguments);
+    };
+  }
+
+  // Return all the elements for which a truth test fails.
+  function reject (obj, predicate, context) {
+  	return _filter(obj, _negate(cb(predicate)), context);
+  }
+
+  // `_random` : an utility's function
+  // ----------------------------------
+
+  // Return a random integer between min and max (inclusive).
+  function _random (min, max) {
+  	if (max == null) {
+  		max = min;
+  		min = 0;
+  	}
+  	return min + Math.floor(Math.random() * (max - min + 1));
+  }
+
+  // Retrieve all the property names of an object.
+  function _allKeys (obj) {
+  	if (!_isObject(obj)) return [];
+  	var keys = [];
+  	for (var key in obj) {
+  		keys.push(key);
+  	} // Ahem, IE < 9.
+  	if (hasEnumBug) collectNonEnumProps(obj, keys);
+  	return keys;
+  }
+
+  // Extend a given object with all the properties in passed-in object(s).
+  var _extend = createAssigner(_allKeys);
+
+  // Create a (shallow-cloned) duplicate of an object.
+  function _clone (obj) {
+  	if (!_isObject(obj)) return obj;
+  	return _isArray(obj) ? obj.slice() : _extend({}, obj);
   }
 
   // Sample **n** random values from a collection using the modern version of the
   // [Fisher-Yates shuffle](http://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
   // If **n** is not specified, returns a single random element.
   // The internal `guard` argument allows it to work with `map`.
-  function _sample(obj, n, guard) {
+  function _sample (obj, n, guard) {
   	if (n == null || guard) {
   		if (!isArrayLike(obj)) obj = _values(obj);
   		return obj[_random(obj.length - 1)];
@@ -707,8 +913,19 @@
   	return levy.slice(0, n);
   }
 
+  // Shuffle a collection.
+  function shuffle (obj) {
+  	return _sample(obj, Infinity);
+  }
+
+  // Return the number of elements in an object.
+  function size (obj) {
+  	if (obj == null) return 0;
+  	return isArrayLike(obj) ? obj.length : _keys(obj).length;
+  }
+
   // Sort the object's values by a criterion produced by an iteratee.
-  function _sortBy(obj, iteratee, context) {
+  function sortBy (obj, iteratee, context) {
   	var index = 0;
   	iteratee = cb(iteratee, context);
   	return _pluck(_map(obj, function (value, key, list) {
@@ -728,27 +945,16 @@
   	}), 'value');
   }
 
-  // Groups the object's values by a criterion. Pass either a string attribute
-  // to group by, or a function that returns the criterion.
-  var _groupBy = group(function (result, value, key) {
-  	if (_has(result, key)) result[key].push(value);else result[key] = [value];
-  });
+  // `_isString` : an object's function
+  // -----------------------------------
 
-  // Indexes the object's values by a criterion, similar to `groupBy`, but for
-  // when you know that your index values will be unique.
-  var _indexBy = group(function (result, value, key) {
-  	result[key] = value;
-  });
-
-  // Counts instances of an object that group by a certain criterion. Pass
-  // either a string attribute to count by, or a function that returns the
-  // criterion.
-  var _countBy = group(function (result, value, key) {
-  	if (_has(result, key)) result[key]++;else result[key] = 1;
-  });
+  // Is a given value a string?
+  function _isString (obj) {
+  	return toString.call(obj) === '[object String]';
+  }
 
   // Safely create a real, live array from anything iterable.
-  function _toArray(obj) {
+  function toArray$1 (obj) {
   	if (!obj) return [];
   	if (_isArray(obj)) return slice.call(obj);
   	if (_isString(obj)) {
@@ -759,77 +965,176 @@
   	return _values(obj);
   }
 
-  // Return the number of elements in an object.
-  function _size(obj) {
-  	if (obj == null) return 0;
-  	return isArrayLike(obj) ? obj.length : _keys(obj).length;
+  // Convenience version of a common use case of `filter`: selecting only objects
+  // containing specific `key:value` pairs.
+  function where (obj, attrs) {
+  	return _filter(obj, _matcher(attrs));
   }
 
-  // Split a collection into two arrays: one whose elements all satisfy the given
-  // predicate, and one whose elements all do not satisfy the predicate.
-  var _partition = group(function (result, value, pass) {
-  	result[pass ? 0 : 1].push(value);
-  }, true);
 
-  // Array Functions
-  // ---------------
 
-  // Get the first element of an array. Passing **n** will return the first N
-  // values in the array. The **guard** check allows it to work with `_map`.
-  function _take(array, n, guard) {
-  	if (array == null || array.length < 1) return void 0;
-  	if (n == null || guard) return array[0];
-  	return _initial(array, array.length - n);
+  var collectionTools = Object.freeze({
+  	all: every,
+  	any: some,
+  	collect: _map,
+  	contains: _contains,
+  	countBy: _countBy,
+  	detect: _find,
+  	each: _each,
+  	every: every,
+  	filter: _filter,
+  	find: _find,
+  	findWhere: findWhere,
+  	first: take,
+  	foldl: _inject,
+  	foldr: _foldr,
+  	forEach: _each,
+  	groupBy: _groupBy,
+  	head: take,
+  	include: _contains,
+  	includes: _contains,
+  	indexBy: _indexBy,
+  	inject: _inject,
+  	invoke: _invoke,
+  	map: _map,
+  	max: _max,
+  	min: min,
+  	partition: _partition,
+  	pluck: _pluck,
+  	reduce: _inject,
+  	reduceRight: _foldr,
+  	reject: reject,
+  	sample: _sample,
+  	select: _filter,
+  	shuffle: shuffle,
+  	size: size,
+  	some: some,
+  	sortBy: sortBy,
+  	toArray: toArray$1,
+  	where: where
+  });
+
+  // Split an **array** into several arrays containing **count** or less elements
+  // of initial array.
+  function chunk (array, count) {
+  	if (count == null || count < 1) return [];
+  	var result = [];
+  	var i = 0,
+  	    length = array.length;
+  	while (i < length) {
+  		result.push(slice.call(array, i, i += count));
+  	}
+  	return result;
   }
-  // The cornerstone, a `head` implementation, aka `take`.
-  var _head = _take;
-  // The cornerstone, a `first` implementation, aka `take`.
-  var _first = _take;
 
-  // Returns everything but the last entry of the array. Especially useful on
-  // the arguments object. Passing **n** will return all the values in
-  // the array, excluding the last N.
-  function _initial(array, n, guard) {
-  	return slice.call(array, 0, Math.max(0, array.length - (n == null || guard ? 1 : n)));
+  // Trim out all falsy values from an array.
+  function compact (array) {
+  	return _filter(array, Boolean);
+  }
+
+  // Take the difference between one array and a number of other arrays.
+  // Only the elements present in just the first array will remain.
+  var _difference = restArgs(function (array, rest) {
+  	rest = flatten(rest, true, true);
+  	return _filter(array, function (value) {
+  		return !_contains(rest, value);
+  	});
+  });
+
+  // Returns everything but the first entry of the array. Aliased as `tail` and `drop`.
+  // Especially useful on the arguments object. Passing an **n** will return
+  // the rest N values in the array.
+  function _rest (array, n, guard) {
+  	return slice.call(array, n == null || guard ? 1 : n);
+  }
+
+  // Returns the last index on an array-like that passes a predicate test.
+  var _findLastIndex = createPredicateIndexFinder(-1);
+
+  // Flatten out an array, either recursively (by default), or just one level.
+  function flatten$1 (array, shallow) {
+  	return flatten(array, shallow, false);
+  }
+
+  // Produce an array that contains every item shared between all the
+  // passed-in arrays.
+  function intersection (array) {
+  	var result = [];
+  	var argsLength = arguments.length;
+  	for (var i = 0, length = getLength(array); i < length; i++) {
+  		var item = array[i];
+  		if (_contains(result, item)) continue;
+  		var j = void 0;
+  		for (j = 1; j < argsLength; j++) {
+  			if (!_contains(arguments[j], item)) break;
+  		}
+  		if (j === argsLength) result.push(item);
+  	}
+  	return result;
   }
 
   // Get the last element of an array. Passing **n** will return the last N
   // values in the array.
-  function _last(array, n, guard) {
+  function last (array, n, guard) {
   	if (array == null || array.length < 1) return void 0;
   	if (n == null || guard) return array[array.length - 1];
   	return _rest(array, Math.max(0, array.length - n));
   }
 
-  // Returns everything but the first entry of the array. Aliased as `tail` and `drop`.
-  // Especially useful on the arguments object. Passing an **n** will return
-  // the rest N values in the array.
-  function _drop(array, n, guard) {
-  	return slice.call(array, n == null || guard ? 1 : n);
-  }
-  // The cornerstone, a `tail` implementation, aka `drop`.
-  var _tail = _drop;
-  // The cornerstone, a `rest` implementation, aka `drop`.
-  var _rest = _drop;
+  // Return the position of the last occurrence of an item in an array,
+  // or -1 if the item is not included in the array.
+  // If the array is large and already in sort order, pass `true`
+  // for **isSorted** to use binary search.
+  var _lastIndexOf = createIndexFinder(-1, _findLastIndex);
 
-  // Trim out all falsy values from an array.
-  function _compact(array) {
-  	return _filter(array, Boolean);
+  // Converts lists into objects. Pass either a single array of `[key, value]`
+  // pairs, or two parallel arrays of the same length -- one of keys, and one of
+  // the corresponding values.
+  function object (list, values) {
+  	var result = {};
+  	for (var i = 0, length = getLength(list); i < length; i++) {
+  		if (values) {
+  			result[list[i]] = values[i];
+  		} else {
+  			result[list[i][0]] = list[i][1];
+  		}
+  	}
+  	return result;
   }
 
-  // Flatten out an array, either recursively (by default), or just one level.
-  function _flatten(array, shallow) {
-  	return flatten(array, shallow, false);
+  // `_range` : an array's function
+  // -------------------------------
+
+  // Generate an integer Array containing an arithmetic progression. A port of
+  // the native Python `range()` function. See
+  // [the Python documentation](http://docs.python.org/library/functions.html#range).
+  function range (start, stop, step) {
+  	if (stop == null) {
+  		stop = start || 0;
+  		start = 0;
+  	}
+  	if (!step) {
+  		step = stop < start ? -1 : 1;
+  	}
+  	var length = Math.max(Math.ceil((stop - start) / step), 0);
+  	var range = Array(length);
+  	for (var idx = 0; idx < length; idx++, start += step) {
+  		range[idx] = start;
+  	}
+  	return range;
   }
 
-  // Return a version of the array that does not contain the specified value(s).
-  var _without = restArgs(function (array, otherArrays) {
-  	return _difference(array, otherArrays);
-  });
+  // `_isBoolean` : an object's function
+  // ------------------------------------
+
+  // Is a given value a boolean?
+  function _isBoolean (obj) {
+  	return obj === true || obj === false || toString.call(obj) === '[object Boolean]';
+  }
 
   // Produce a duplicate-free version of the array. If the array has already
   // been sorted, you have the option of using a faster algorithm.
-  function _unique(array, isSorted, iteratee, context) {
+  function _uniq (array, isSorted, iteratee, context) {
   	if (!_isBoolean(isSorted)) {
   		context = iteratee;
   		iteratee = isSorted;
@@ -855,8 +1160,6 @@
   	}
   	return result;
   }
-  // The cornerstone, a `uniq` implementation, aka `unique`.
-  var _uniq = _unique;
 
   // Produce an array that contains the union: each distinct element from all of
   // the passed-in arrays.
@@ -864,35 +1167,9 @@
   	return _uniq(flatten(arrays, true, true));
   });
 
-  // Produce an array that contains every item shared between all the
-  // passed-in arrays.
-  function _intersection(array) {
-  	var result = [];
-  	var argsLength = arguments.length;
-  	for (var i = 0, length = getLength(array); i < length; i++) {
-  		var item = array[i];
-  		if (_contains(result, item)) continue;
-  		var j = void 0;
-  		for (j = 1; j < argsLength; j++) {
-  			if (!_contains(arguments[j], item)) break;
-  		}
-  		if (j === argsLength) result.push(item);
-  	}
-  	return result;
-  }
-
-  // Take the difference between one array and a number of other arrays.
-  // Only the elements present in just the first array will remain.
-  var _difference = restArgs(function (array, rest) {
-  	rest = flatten(rest, true, true);
-  	return _filter(array, function (value) {
-  		return !_contains(rest, value);
-  	});
-  });
-
   // Complement of `_.zip`. Unzip accepts an array of arrays and groups
   // each array's elements on shared indices.
-  function _unzip(array) {
+  function _unzip (array) {
   	var length = array && _max(array, getLength).length || 0;
   	var result = Array(length);
 
@@ -902,123 +1179,174 @@
   	return result;
   }
 
+  // Return a version of the array that does not contain the specified value(s).
+  var _without = restArgs(function (array, otherArrays) {
+  	return _difference(array, otherArrays);
+  });
+
   // Zip together multiple lists into a single array -- elements that share
   // an index go together.
   var _zip = restArgs(_unzip);
 
-  // Converts lists into objects. Pass either a single array of `[key, value]`
-  // pairs, or two parallel arrays of the same length -- one of keys, and one of
-  // the corresponding values.
-  function _object(list, values) {
-  	var result = {};
-  	for (var i = 0, length = getLength(list); i < length; i++) {
-  		if (values) {
-  			result[list[i]] = values[i];
-  		} else {
-  			result[list[i][0]] = list[i][1];
-  		}
-  	}
+
+
+  var arrayTools = Object.freeze({
+  	chunk: chunk,
+  	compact: compact,
+  	difference: _difference,
+  	drop: _rest,
+  	findIndex: _findIndex,
+  	findLastIndex: _findLastIndex,
+  	flatten: flatten$1,
+  	indexOf: _indexOf,
+  	initial: _initial,
+  	intersection: intersection,
+  	last: last,
+  	lastIndexOf: _lastIndexOf,
+  	object: object,
+  	range: range,
+  	rest: _rest,
+  	sortedIndex: _sortedIndex,
+  	tail: _rest,
+  	take: take,
+  	union: _union,
+  	uniq: _uniq,
+  	unique: _uniq,
+  	unzip: _unzip,
+  	without: _without,
+  	zip: _zip
+  });
+
+  // Creates an object that inherits from the given prototype object.
+  // If additional properties are provided then they will be added to the
+  // created object.
+  function create (prototype, props) {
+  	var result = baseCreate(prototype);
+  	if (props) _extendOwn(result, props);
   	return result;
   }
 
-  // Returns the first index on an array-like that passes a predicate test.
-  var _findIndex = createPredicateIndexFinder(1);
-  var _findLastIndex = createPredicateIndexFinder(-1);
+  // Fill in a given object with default properties.
+  var _defaults = createAssigner(_allKeys, true);
 
-  // Use a comparator function to figure out the smallest index at which
-  // an object should be inserted so as to maintain order. Uses binary search.
-  function _sortedIndex(array, obj, iteratee, context) {
-  	iteratee = cb(iteratee, context, 1);
-  	var value = iteratee(obj);
-  	var low = 0,
-  	    high = getLength(array);
-  	while (low < high) {
-  		var mid = Math.floor((low + high) / 2);
-  		if (iteratee(array[mid]) < value) low = mid + 1;else high = mid;
-  	}
-  	return low;
-  }
-
-  // Return the position of the first occurrence of an item in an array,
-  // or -1 if the item is not included in the array.
-  // If the array is large and already in sort order, pass `true`
-  // for **isSorted** to use binary search.
-  var _indexOf = createIndexFinder(1, _findIndex, _sortedIndex);
-  var _lastIndexOf = createIndexFinder(-1, _findLastIndex);
-
-  // Generate an integer Array containing an arithmetic progression. A port of
-  // the native Python `range()` function. See
-  // [the Python documentation](http://docs.python.org/library/functions.html#range).
-  function _range(start, stop, step) {
-  	if (stop == null) {
-  		stop = start || 0;
-  		start = 0;
-  	}
-  	if (!step) {
-  		step = stop < start ? -1 : 1;
-  	}
-  	var length = Math.max(Math.ceil((stop - start) / step), 0);
-  	var range = Array(length);
-  	for (var idx = 0; idx < length; idx++, start += step) {
-  		range[idx] = start;
-  	}
-  	return range;
-  }
-
-  // Split an **array** into several arrays containing **count** or less elements
-  // of initial array.
-  function _chunk(array, count) {
-  	if (count == null || count < 1) return [];
-  	var result = [];
-  	var i = 0,
-  	    length = array.length;
-  	while (i < length) {
-  		result.push(slice.call(array, i, i += count));
-  	}
-  	return result;
-  }
-
-  // Object Functions
-  // ----------------
-
-  // Retrieve the names of an object's own properties.
-  // Delegates to **ECMAScript 5**'s native `Object.keys`.
-  function _keys(obj) {
-  	if (!_isObject(obj)) return [];
-  	if (nativeKeys) return nativeKeys(obj);
-  	var keys = [];
+  // Return a sorted list of the function names available on the object.
+  function methods (obj) {
+  	var names = [];
   	for (var key in obj) {
-  		if (_has(obj, key)) keys.push(key);
-  	} // Ahem, IE < 9.
-  	if (hasEnumBug) collectNonEnumProps(obj, keys);
-  	return keys;
-  }
-
-  // Retrieve all the property names of an object.
-  function _allKeys(obj) {
-  	if (!_isObject(obj)) return [];
-  	var keys = [];
-  	for (var key in obj) {
-  		keys.push(key);
-  	} // Ahem, IE < 9.
-  	if (hasEnumBug) collectNonEnumProps(obj, keys);
-  	return keys;
-  }
-
-  // Retrieve the values of an object's properties.
-  function _values(obj) {
-  	var keys = _keys(obj);
-  	var length = keys.length;
-  	var values = Array(length);
-  	for (var i = 0; i < length; i++) {
-  		values[i] = obj[keys[i]];
+  		if (_isFunction(obj[key])) names.push(key);
   	}
-  	return values;
+  	return names.sort();
+  }
+
+  // `_isDate` : an object's function
+  // ---------------------------------
+
+  // Is a given value a date?
+  function isDate (obj) {
+  	return toString.call(obj) === '[object Date]';
+  }
+
+  // `_isElement` : an object's function
+  // ------------------------------------
+
+  // Is a given value a DOM element?
+  function isElement (obj) {
+  	return !!(obj && obj.nodeType === 1);
+  }
+
+  // Is a given array, string, or object empty?
+  // An "empty" object has no enumerable own-properties.
+  function isEmpty (obj) {
+  	if (obj == null) return true;
+  	if (isArrayLike(obj) && (_isArray(obj) || _isString(obj) || _isArguments(obj))) return obj.length === 0;
+  	return _keys(obj).length === 0;
+  }
+
+  // Perform a deep comparison to check if two objects are equal.
+  function isEqual (a, b) {
+  	return eq(a, b);
+  }
+
+  // `_isError` : an object's function
+  // ----------------------------------
+
+  // Is a given value an error?
+  function isError (obj) {
+  	return toString.call(obj) === '[object Error]';
+  }
+
+  // `_isSymbol` : an object's function
+  // -----------------------------------
+
+  // Is a given value a symbol?
+  function _isSymbol (obj) {
+  	return toString.call(obj) === '[object Symbol]';
+  }
+
+  // Is a given object a finite number?
+  function isFinite$1 (obj) {
+  	return !_isSymbol(obj) && isFinite(obj) && !isNaN(parseFloat(obj));
+  }
+
+  // `_isMap` : an object's function
+  // ---------------------------------
+
+  // Is a given value a map?
+  function isMap (obj) {
+  	return toString.call(obj) === '[object Map]';
+  }
+
+  // `_isNull` : an object's function
+  // ---------------------------------
+
+  // Is a given value equal to null?
+  function isNull (obj) {
+  	return obj === null;
+  };
+
+  // `_isRegExp` : an object's function
+  // -----------------------------------
+
+  // Is a given value a regular expression?
+  function isRegExp (obj) {
+  	return toString.call(obj) === '[object RegExp]';
+  }
+
+  // `_isSet` : an object's function
+  // --------------------------------
+
+  // Is a given value a set?
+  function isSet (obj) {
+  	return toString.call(obj) === '[object Set]';
+  }
+
+  // `_isUndefined` : an object's function
+  // --------------------------------------
+
+  // Is a given variable undefined?
+  function isUndefined (obj) {
+  	return obj === void 0;
+  }
+
+  // `_isWeakMap` : an object's function
+  // ------------------------------------
+
+  // Is a given value a weak-map?
+  function isWeakMap (obj) {
+  	return toString.call(obj) === '[object WeakMap]';
+  }
+
+  // `_isWeakSet` : an object's function
+  // ------------------------------------
+
+  // Is a given value a weak-set?
+  function isWeakSet (obj) {
+  	return toString.call(obj) === '[object WeakSet]';
   }
 
   // Returns the results of applying the iteratee to each element of the object.
   // In contrast to `_.map` it returns an object.
-  function _mapObject(obj, iteratee, context) {
+  function mapObject (obj, iteratee, context) {
   	iteratee = cb(iteratee, context);
   	var keys = _keys(obj),
   	    length = keys.length,
@@ -1028,57 +1356,6 @@
   		results[currentKey] = iteratee(obj[currentKey], currentKey, obj);
   	}
   	return results;
-  }
-
-  // Convert an object into a list of `[key, value]` pairs.
-  function _pairs(obj) {
-  	var keys = _keys(obj);
-  	var length = keys.length;
-  	var pairs = Array(length);
-  	for (var i = 0; i < length; i++) {
-  		pairs[i] = [keys[i], obj[keys[i]]];
-  	}
-  	return pairs;
-  }
-
-  // Invert the keys and values of an object. The values must be serializable.
-  function _invert(obj) {
-  	var result = {};
-  	var keys = _keys(obj);
-  	for (var i = 0, length = keys.length; i < length; i++) {
-  		result[obj[keys[i]]] = keys[i];
-  	}
-  	return result;
-  }
-
-  // Return a sorted list of the function names available on the object.
-  function _methods(obj) {
-  	var names = [];
-  	for (var key in obj) {
-  		if (_isFunction(obj[key])) names.push(key);
-  	}
-  	return names.sort();
-  }
-  // The cornerstone, a `functions` implementation, aka `methods`.
-  var _functions = _methods;
-
-  // Extend a given object with all the properties in passed-in object(s).
-  var _extend = createAssigner(_allKeys);
-
-  // Assigns a given object with all the own properties in the passed-in object(s).
-  // (https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object/assign)
-  var _extendOwn = createAssigner(_keys);
-  var _assign = _extendOwn;
-
-  // Returns the first key on an object that passes a predicate test.
-  function _findKey(obj, predicate, context) {
-  	predicate = cb(predicate, context);
-  	var keys = _keys(obj),
-  	    key = void 0;
-  	for (var i = 0, length = keys.length; i < length; i++) {
-  		key = keys[i];
-  		if (predicate(obj[key], key, obj)) return key;
-  	}
   }
 
   // Return a copy of the object only containing the whitelisted properties.
@@ -1118,469 +1395,346 @@
   	return _pick(obj, iteratee, context);
   });
 
-  // Fill in a given object with default properties.
-  var _defaults = createAssigner(_allKeys, true);
-
-  // Creates an object that inherits from the given prototype object.
-  // If additional properties are provided then they will be added to the
-  // created object.
-  function _create(prototype, props) {
-  	var result = baseCreate(prototype);
-  	if (props) _extendOwn(result, props);
-  	return result;
+  // Convert an object into a list of `[key, value]` pairs.
+  function pairs (obj) {
+  	var keys = _keys(obj);
+  	var length = keys.length;
+  	var pairs = Array(length);
+  	for (var i = 0; i < length; i++) {
+  		pairs[i] = [keys[i], obj[keys[i]]];
+  	}
+  	return pairs;
   }
 
-  // Create a (shallow-cloned) duplicate of an object.
-  function _clone(obj) {
-  	if (!_isObject(obj)) return obj;
-  	return _isArray(obj) ? obj.slice() : _extend({}, obj);
-  }
+  // `_tap` : an object's function
+  // ---------------------------------
 
   // Invokes interceptor with the obj, and then returns obj.
   // The primary purpose of this method is to "tap into" a method chain, in
   // order to perform operations on intermediate results within the chain.
-  function _tap(obj, interceptor) {
+  function tap (obj, interceptor) {
   	interceptor(obj);
   	return obj;
   }
 
-  // Returns whether an object has a given set of `key:value` pairs.
-  function _isMatch(object, attrs) {
-  	var keys = _keys(attrs),
-  	    length = keys.length;
-  	if (object == null) return !length;
-  	var obj = Object(object);
-  	for (var i = 0; i < length; i++) {
-  		var key = keys[i];
-  		if (attrs[key] !== obj[key] || !(key in obj)) return false;
-  	}
-  	return true;
+
+
+  var objectTools = Object.freeze({
+  	allKeys: _allKeys,
+  	assign: _extendOwn,
+  	clone: _clone,
+  	create: create,
+  	defaults: _defaults,
+  	extend: _extend,
+  	extendOwn: _extendOwn,
+  	findKey: _findKey,
+  	functions: methods,
+  	has: _has,
+  	invert: _invert,
+  	isArguments: _isArguments,
+  	isArray: _isArray,
+  	isBoolean: _isBoolean,
+  	isDate: isDate,
+  	isElement: isElement,
+  	isEmpty: isEmpty,
+  	isEqual: isEqual,
+  	isError: isError,
+  	isFinite: isFinite$1,
+  	isFunction: _isFunction,
+  	isMap: isMap,
+  	isMatch: _isMatch,
+  	isNaN: _isNaN,
+  	isNull: isNull,
+  	isNumber: _isNumber,
+  	isObject: _isObject,
+  	isRegExp: isRegExp,
+  	isSet: isSet,
+  	isString: _isString,
+  	isSymbol: _isSymbol,
+  	isUndefined: isUndefined,
+  	isWeakMap: isWeakMap,
+  	isWeakSet: isWeakSet,
+  	keys: _keys,
+  	mapObject: mapObject,
+  	methods: methods,
+  	omit: _omit,
+  	pairs: pairs,
+  	pick: _pick,
+  	tap: tap,
+  	values: _values
+  });
+
+  // `_after` : (ahem) a function's function
+  // ----------------------------------------
+
+  // Returns a function that will only be executed on and after the Nth call.
+  function after (times, func) {
+    return function () {
+      if (--times < 1) {
+        return func.apply(this, arguments);
+      }
+    };
   }
 
-  // Perform a deep comparison to check if two objects are equal.
-  function _isEqual(a, b) {
-  	return eq(a, b);
+  // `_before` : (ahem) a function's function
+  // -----------------------------------------
+
+  // Returns a function that will only be executed up to (but not including) the Nth call.
+  function _before (times, func) {
+    var memo;
+    return function () {
+      if (--times > 0) {
+        memo = func.apply(this, arguments);
+      }
+      if (times <= 1) func = null;
+      return memo;
+    };
   }
-
-  // Is a given array, string, or object empty?
-  // An "empty" object has no enumerable own-properties.
-  function _isEmpty(obj) {
-  	if (obj == null) return true;
-  	if (isArrayLike(obj) && (_isArray(obj) || _isString(obj) || _isArguments(obj))) return obj.length === 0;
-  	return _keys(obj).length === 0;
-  }
-
-  // Is a given value a DOM element?
-  function _isElement(obj) {
-  	return !!(obj && obj.nodeType === 1);
-  }
-
-  // Is a given value an array?
-  // Delegates to ECMA5's native Array.isArray
-  var _isArray = nativeIsArray || function (obj) {
-  	return toString.call(obj) === '[object Array]';
-  };
-
-  // Is a given variable an object?
-  function _isObject(obj) {
-  	var type = typeof obj === 'undefined' ? 'undefined' : _typeof(obj);
-  	return type === 'function' || type === 'object' && !!obj;
-  }
-
-  // Is a given value an arguments object?
-  var _isArguments = customArguments() || function (obj) {
-  	return toString.call(obj) === '[object Arguments]';
-  };
-
-  // Is a given value a function?
-  var _isFunction = customFunction() || function (obj) {
-  	return toString.call(obj) === '[object Function]';
-  };
-
-  // Is a given value a string?
-  function _isString(obj) {
-  	return toString.call(obj) === '[object String]';
-  }
-
-  // Is a given value a number?
-  function _isNumber(obj) {
-  	return toString.call(obj) === '[object Number]';
-  }
-
-  // Is a given value a date?
-  function _isDate(obj) {
-  	return toString.call(obj) === '[object Date]';
-  }
-
-  // Is a given value a regular expression?
-  function _isRegExp(obj) {
-  	return toString.call(obj) === '[object RegExp]';
-  }
-
-  // Is a given value an error?
-  function _isError(obj) {
-  	return toString.call(obj) === '[object Error]';
-  }
-
-  // Is a given value a symbol?
-  function _isSymbol(obj) {
-  	return toString.call(obj) === '[object Symbol]';
-  }
-
-  // Is a given value a map?
-  function _isMap(obj) {
-  	return toString.call(obj) === '[object Map]';
-  }
-
-  // Is a given value a weak-map?
-  function _isWeakMap(obj) {
-  	return toString.call(obj) === '[object WeakMap]';
-  }
-
-  // Is a given value a set?
-  function _isSet(obj) {
-  	return toString.call(obj) === '[object Set]';
-  }
-
-  // Is a given value a weak-set?
-  function _isWeakSet(obj) {
-  	return toString.call(obj) === '[object WeakSet]';
-  }
-
-  // Is a given object a finite number?
-  function _isFinite(obj) {
-  	return !_isSymbol(obj) && isFinite(obj) && !isNaN(parseFloat(obj));
-  }
-
-  // Is the given value `NaN`?
-  function _isNaN(obj) {
-  	return _isNumber(obj) && isNaN(obj);
-  }
-
-  // Is a given value a boolean?
-  function _isBoolean(obj) {
-  	return obj === true || obj === false || toString.call(obj) === '[object Boolean]';
-  }
-
-  // Is a given value equal to null?
-  function _isNull(obj) {
-  	return obj === null;
-  };
-
-  // Is a given variable undefined?
-  function _isUndefined(obj) {
-  	return obj === void 0;
-  }
-
-  // Shortcut function for checking if an object has a given property directly
-  // on itself (in other words, not on a prototype).
-  // @TODO use _isNull instead
-  function _has(obj, key) {
-  	return obj != null && hasOwnProperty.call(obj, key);
-  }
-
-  // Function (ahem) Functions
-  // -------------------------
 
   // Create a function bound to a given object (assigning `this`, and arguments,
   // optionally). Delegates to **ECMAScript 5**'s native `Function.bind` if
   // available.
   var _bind = restArgs(function (func, context, args) {
-  	if (!_isFunction(func)) throw new TypeError('Bind must be called on a function');
-  	var bound = restArgs(function (callArgs) {
-  		return executeBound(func, bound, context, this, args.concat(callArgs));
-  	});
-  	return bound;
+    if (!_isFunction(func)) throw new TypeError('Bind must be called on a function');
+    var bound = restArgs(function (callArgs) {
+      return executeBound(func, bound, context, this, args.concat(callArgs));
+    });
+    return bound;
   });
+
+  // Bind a number of an object's methods to that object. Remaining arguments
+  // are the method names to be bound. Useful for ensuring that all callbacks
+  // defined on an object belong to it.
+  var _bindAll = restArgs(function (obj, keys) {
+    keys = flatten(keys, false, false);
+    var index = keys.length;
+    if (index < 1) throw new Error('bindAll must be passed function names');
+    while (index--) {
+      var key = keys[index];
+      obj[key] = _bind(obj[key], obj);
+    }
+  });
+
+  // `_compose` : (ahem) a function's function
+  // ------------------------------------------
+
+  // Returns a function that is the composition of a list of functions, each
+  // consuming the return value of the function that follows.
+  function compose () {
+    var args = arguments;
+    var start = args.length - 1;
+    return function () {
+      var i = start;
+      var result = args[start].apply(this, arguments);
+      while (i--) {
+        result = args[i].call(this, result);
+      }return result;
+    };
+  }
+
+  // Delays a function for the given number of milliseconds, and then calls
+  // it with the arguments supplied.
+  var _delay = restArgs(function (func, wait, args) {
+    return setTimeout(function () {
+      return func.apply(null, args);
+    }, wait);
+  });
+
+  // Returns a function, that, as long as it continues to be invoked, will not
+  // be triggered. The function will be called after it stops being called for
+  // N milliseconds. If `immediate` is passed, trigger the function on the
+  // leading edge, instead of the trailing.
+  function debounce (func, wait, immediate) {
+    var timeout = void 0,
+        result = void 0;
+
+    var later = function later(context, args) {
+      timeout = null;
+      if (args) result = func.apply(context, args);
+    };
+
+    var debounced = restArgs(function (args) {
+      if (timeout) clearTimeout(timeout);
+      if (immediate) {
+        var callNow = !timeout;
+        timeout = setTimeout(later, wait);
+        if (callNow) result = func.apply(this, args);
+      } else {
+        timeout = _delay(later, wait, this, args);
+      }
+
+      return result;
+    });
+
+    debounced.cancel = function () {
+      clearTimeout(timeout);
+      timeout = null;
+    };
+
+    return debounced;
+  }
 
   // Partially apply a function by creating a version that has had some of its
   // arguments pre-filled, without changing its dynamic `this` context. _ acts
   // as a placeholder by default, allowing any combination of arguments to be
   // pre-filled. Set `_.partial.placeholder` for a custom placeholder argument.
   var _partial = restArgs(function (func, boundArgs) {
-  	var placeholder = _partial.placeholder;
-  	var bound = function bound() {
-  		var position = 0,
-  		    length = boundArgs.length;
-  		var args = Array(length);
-  		for (var i = 0; i < length; i++) {
-  			args[i] = boundArgs[i] === placeholder ? arguments[position++] : boundArgs[i];
-  		}
-  		while (position < arguments.length) {
-  			args.push(arguments[position++]);
-  		}return executeBound(func, bound, this, this, args);
-  	};
-  	return bound;
+    var placeholder = _partial.placeholder;
+    var bound = function bound() {
+      var position = 0,
+          length = boundArgs.length;
+      var args = Array(length);
+      for (var i = 0; i < length; i++) {
+        args[i] = boundArgs[i] === placeholder ? arguments[position++] : boundArgs[i];
+      }
+      while (position < arguments.length) {
+        args.push(arguments[position++]);
+      }return executeBound(func, bound, this, this, args);
+    };
+    return bound;
   });
   _partial.placeholder = _$1;
-
-  // Bind a number of an object's methods to that object. Remaining arguments
-  // are the method names to be bound. Useful for ensuring that all callbacks
-  // defined on an object belong to it.
-  var _bindAll = restArgs(function (obj, keys) {
-  	keys = flatten(keys, false, false);
-  	var index = keys.length;
-  	if (index < 1) throw new Error('bindAll must be passed function names');
-  	while (index--) {
-  		var key = keys[index];
-  		obj[key] = _bind(obj[key], obj);
-  	}
-  });
-
-  // Memoize an expensive function by storing its results.
-  function _memoize(func, hasher) {
-  	var memoize = function memoize(key) {
-  		var cache = memoize.cache;
-  		var address = '' + (hasher ? hasher.apply(this, arguments) : key);
-  		if (!_has(cache, address)) cache[address] = func.apply(this, arguments);
-  		return cache[address];
-  	};
-  	memoize.cache = {};
-  	return memoize;
-  }
-
-  // Delays a function for the given number of milliseconds, and then calls
-  // it with the arguments supplied.
-  var _delay = restArgs(function (func, wait, args) {
-  	return setTimeout(function () {
-  		return func.apply(null, args);
-  	}, wait);
-  });
 
   // Defers a function, scheduling it to run after the current call stack has cleared.
   var _defer = _partial(_delay, _partial.placeholder, 1);
 
-  // Returns a function, that, when invoked, will only be triggered at most once
-  // during a given window of time. Normally, the throttled function will run
-  // as much as it can, without ever going more than once per `wait` duration;
-  // but if you'd like to disable the execution on the leading edge, pass
-  // `{leading: false}`. To disable execution on the trailing edge, ditto.
-  function _throttle(func, wait, options) {
-  	var timeout = void 0,
-  	    context = void 0,
-  	    args = void 0,
-  	    result = void 0;
-  	var previous = 0;
-  	if (!options) options = {};
-
-  	var later = function later() {
-  		previous = options.leading === false ? 0 : _now();
-  		timeout = null;
-  		result = func.apply(context, args);
-  		if (!timeout) context = args = null;
-  	};
-
-  	var throttled = function throttled() {
-  		var now = _now();
-  		if (!previous && options.leading === false) previous = now;
-  		var remaining = wait - (now - previous);
-  		context = this;
-  		args = arguments;
-  		if (remaining <= 0 || remaining > wait) {
-  			if (timeout) {
-  				clearTimeout(timeout);
-  				timeout = null;
-  			}
-  			previous = now;
-  			result = func.apply(context, args);
-  			if (!timeout) context = args = null;
-  		} else if (!timeout && options.trailing !== false) {
-  			timeout = setTimeout(later, remaining);
-  		}
-  		return result;
-  	};
-
-  	throttled.cancel = function () {
-  		clearTimeout(timeout);
-  		previous = 0;
-  		timeout = context = args = null;
-  	};
-
-  	return throttled;
-  }
-
-  // Returns a function, that, as long as it continues to be invoked, will not
-  // be triggered. The function will be called after it stops being called for
-  // N milliseconds. If `immediate` is passed, trigger the function on the
-  // leading edge, instead of the trailing.
-  function _debounce(func, wait, immediate) {
-  	var timeout = void 0,
-  	    result = void 0;
-
-  	var later = function later(context, args) {
-  		timeout = null;
-  		if (args) result = func.apply(context, args);
-  	};
-
-  	var debounced = restArgs(function (args) {
-  		if (timeout) clearTimeout(timeout);
-  		if (immediate) {
-  			var callNow = !timeout;
-  			timeout = setTimeout(later, wait);
-  			if (callNow) result = func.apply(this, args);
-  		} else {
-  			timeout = _delay(later, wait, this, args);
-  		}
-
-  		return result;
-  	});
-
-  	debounced.cancel = function () {
-  		clearTimeout(timeout);
-  		timeout = null;
-  	};
-
-  	return debounced;
-  }
-
-  // Returns the first function passed as an argument to the second,
-  // allowing you to adjust arguments, run code before and after, and
-  // conditionally execute the original function.
-  function _wrap(func, wrapper) {
-  	return _partial(wrapper, func);
-  }
-
-  // Returns a negated version of the passed-in predicate.
-  function _negate(predicate) {
-  	return function () {
-  		return !predicate.apply(this, arguments);
-  	};
-  }
-
-  // Returns a function that is the composition of a list of functions, each
-  // consuming the return value of the function that follows.
-  function _compose() {
-  	var args = arguments;
-  	var start = args.length - 1;
-  	return function () {
-  		var i = start;
-  		var result = args[start].apply(this, arguments);
-  		while (i--) {
-  			result = args[i].call(this, result);
-  		}return result;
-  	};
-  }
-
-  // Returns a function that will only be executed on and after the Nth call.
-  function _after(times, func) {
-  	return function () {
-  		if (--times < 1) {
-  			return func.apply(this, arguments);
-  		}
-  	};
-  }
-
-  // Returns a function that will only be executed up to (but not including) the Nth call.
-  function _before(times, func) {
-  	var memo;
-  	return function () {
-  		if (--times > 0) {
-  			memo = func.apply(this, arguments);
-  		}
-  		if (times <= 1) func = null;
-  		return memo;
-  	};
+  // Memoize an expensive function by storing its results.
+  function memoize (func, hasher) {
+    var memoize = function memoize(key) {
+      var cache = memoize.cache;
+      var address = '' + (hasher ? hasher.apply(this, arguments) : key);
+      if (!_has(cache, address)) cache[address] = func.apply(this, arguments);
+      return cache[address];
+    };
+    memoize.cache = {};
+    return memoize;
   }
 
   // Returns a function that will be executed at most one time, no matter how
   // often you call it. Useful for lazy initialization.
   var _once = _partial(_before, 2);
 
-  // This accumulates the arguments passed into an array, after a given index.
-  var _restArgs = restArgs;
-
-  // Utility Functions
-  // -----------------
-
-  // Keep the identity function around for default iteratees.
-  function _identity(value) {
-  	return value;
-  }
-
-  // Predicate-generating functions. Often useful outside of Underscore.
-  function _constant(value) {
-  	return function () {
-  		return value;
-  	};
-  }
-
-  // `noop` function
-  function _noop() {}
-
-  // function used for get key's value from an object.
-  var _property = property;
-
-  // Generates a function for a given object that returns a given property.
-  function _propertyOf(obj) {
-  	return obj == null ? function () {} : function (key) {
-  		return obj[key];
-  	};
-  }
-
-  // Returns a predicate for checking whether an object has a given set of
-  // `key:value` pairs.
-  function _matches(attrs) {
-  	attrs = _extendOwn({}, attrs);
-  	return function (obj) {
-  		return _isMatch(obj, attrs);
-  	};
-  }
-  // The cornerstone, a `matcher` implementation, aka `matches`.
-  var _matcher = _matches;
-
-  // Run a function **n** times.
-  function _times(n, iteratee, context) {
-  	var accum = Array(Math.max(0, n));
-  	iteratee = optimizeCb(iteratee, context, 1);
-  	for (var i = 0; i < n; i++) {
-  		accum[i] = iteratee(i);
-  	}return accum;
-  }
-
-  // External wrapper for our callback generator. Users may customize
-  // `_.iteratee` if they want additional predicate/iteratee shorthand styles.
-  // This abstraction hides the internal-only argCount argument.
-  var _iteratee = builtinIteratee;
-  function _setIteratee(fn) {
-  	_iteratee = _isFunction(fn) ? fn : builtinIteratee;
-  }
-
-  // Return a random integer between min and max (inclusive).
-  function _random(min, max) {
-  	if (max == null) {
-  		max = min;
-  		min = 0;
-  	}
-  	return min + Math.floor(Math.random() * (max - min + 1));
-  }
+  // `_now` : an utility's function
+  // -------------------------------
 
   // A (possibly faster) way to get the current timestamp as an integer.
   var _now = Date.now || function () {
   	return new Date().getTime();
   };
 
+  // Returns a function, that, when invoked, will only be triggered at most once
+  // during a given window of time. Normally, the throttled function will run
+  // as much as it can, without ever going more than once per `wait` duration;
+  // but if you'd like to disable the execution on the leading edge, pass
+  // `{leading: false}`. To disable execution on the trailing edge, ditto.
+  function throttle (func, wait, options) {
+    var timeout = void 0,
+        context = void 0,
+        args = void 0,
+        result = void 0;
+    var previous = 0;
+    if (!options) options = {};
+
+    var later = function later() {
+      previous = options.leading === false ? 0 : _now();
+      timeout = null;
+      result = func.apply(context, args);
+      if (!timeout) context = args = null;
+    };
+
+    var throttled = function throttled() {
+      var now = _now();
+      if (!previous && options.leading === false) previous = now;
+      var remaining = wait - (now - previous);
+      context = this;
+      args = arguments;
+      if (remaining <= 0 || remaining > wait) {
+        if (timeout) {
+          clearTimeout(timeout);
+          timeout = null;
+        }
+        previous = now;
+        result = func.apply(context, args);
+        if (!timeout) context = args = null;
+      } else if (!timeout && options.trailing !== false) {
+        timeout = setTimeout(later, remaining);
+      }
+      return result;
+    };
+
+    throttled.cancel = function () {
+      clearTimeout(timeout);
+      previous = 0;
+      timeout = context = args = null;
+    };
+
+    return throttled;
+  }
+
+  // Returns the first function passed as an argument to the second,
+  // allowing you to adjust arguments, run code before and after, and
+  // conditionally execute the original function.
+  function wrap (func, wrapper) {
+    return _partial(wrapper, func);
+  }
+
+
+
+  var functionTools = Object.freeze({
+  	after: after,
+  	before: _before,
+  	bind: _bind,
+  	bindAll: _bindAll,
+  	compose: compose,
+  	debounce: debounce,
+  	defer: _defer,
+  	delay: _delay,
+  	memoize: memoize,
+  	negate: _negate,
+  	once: _once,
+  	partial: _partial,
+  	restArgs: restArgs,
+  	throttle: throttle,
+  	wrap: wrap
+  });
+
+  // `_constant` : an utility's function
+  // ------------------------------------
+
+  // Predicate-generating functions. Often useful outside of Underscore.
+  function constant (value) {
+  	return function () {
+  		return value;
+  	};
+  }
+
   // Functions for escaping strings to/from HTML interpolation.
   var _escape = createEscaper(escapeMap);
 
-  // Functions for unescaping strings to/from HTML interpolation.
-  var _unescape = createEscaper(unescapeMap);
+  // `_noop` : an utility's function
+  // --------------------------------
+
+  // `noop` function
+  function noop () {}
+
+  // `_propertyOf` : an utility's function
+  // --------------------------------------
+
+  // Generates a function for a given object that returns a given property.
+  function propertyOf (obj) {
+  	return obj == null ? function () {} : function (key) {
+  		return obj[key];
+  	};
+  }
 
   // If the value of the named `property` is a function then invoke it with the
   // `object` as context; otherwise, return it.
-  function _result(object, prop, fallback) {
+  function result (object, prop, fallback) {
   	var value = object == null ? void 0 : object[prop];
   	if (value === void 0) {
   		value = fallback;
   	}
   	return _isFunction(value) ? value.call(object) : value;
-  }
-
-  // Generate a unique integer id (unique within the entire client session).
-  // Useful for temporary DOM ids.
-  var idCounter = 0;
-  function _uniqueId(prefix) {
-  	var id = ++idCounter + '';
-  	return prefix ? prefix + id : id;
   }
 
   // JavaScript micro-templating, similar to John Resig's implementation.
@@ -1645,146 +1799,49 @@
   	escape: /<%-([\s\S]+?)%>/g
   };
 
+  // Run a function **n** times.
+  function times (n, iteratee, context) {
+  	var accum = Array(Math.max(0, n));
+  	iteratee = optimizeCb(iteratee, context, 1);
+  	for (var i = 0; i < n; i++) {
+  		accum[i] = iteratee(i);
+  	}return accum;
+  }
+
+  // Functions for unescaping strings to/from HTML interpolation.
+  var _unescape = createEscaper(unescapeMap);
+
+  // `_uniqueId` : an utility's function
+  // ------------------------------------
+
+  // Generate a unique integer id (unique within the entire client session).
+  // Useful for temporary DOM ids.
+  var idCounter = 0;
+  function uniqueId (prefix) {
+  	var id = ++idCounter + '';
+  	return prefix ? prefix + id : id;
+  }
 
 
-  var _tools = Object.freeze({
-  	_: _$1,
-  	_forEach: _forEach,
-  	_each: _each,
-  	_collect: _collect,
-  	_map: _map,
-  	_inject: _inject,
-  	_foldl: _foldl,
-  	_reduce: _reduce,
-  	_foldr: _foldr,
-  	_reduceRight: _reduceRight,
-  	_detect: _detect,
-  	_find: _find,
-  	_select: _select,
-  	_filter: _filter,
-  	_reject: _reject,
-  	_all: _all,
-  	_every: _every,
-  	_any: _any,
-  	_some: _some,
-  	_include: _include,
-  	_includes: _includes,
-  	_contains: _contains,
-  	_invoke: _invoke,
-  	_pluck: _pluck,
-  	_where: _where,
-  	_findWhere: _findWhere,
-  	_max: _max,
-  	_min: _min,
-  	_shuffle: _shuffle,
-  	_sample: _sample,
-  	_sortBy: _sortBy,
-  	_groupBy: _groupBy,
-  	_indexBy: _indexBy,
-  	_countBy: _countBy,
-  	_toArray: _toArray,
-  	_size: _size,
-  	_partition: _partition,
-  	_take: _take,
-  	_head: _head,
-  	_first: _first,
-  	_initial: _initial,
-  	_last: _last,
-  	_drop: _drop,
-  	_tail: _tail,
-  	_rest: _rest,
-  	_compact: _compact,
-  	_flatten: _flatten,
-  	_without: _without,
-  	_unique: _unique,
-  	_uniq: _uniq,
-  	_union: _union,
-  	_intersection: _intersection,
-  	_difference: _difference,
-  	_unzip: _unzip,
-  	_zip: _zip,
-  	_object: _object,
-  	_findIndex: _findIndex,
-  	_findLastIndex: _findLastIndex,
-  	_sortedIndex: _sortedIndex,
-  	_indexOf: _indexOf,
-  	_lastIndexOf: _lastIndexOf,
-  	_range: _range,
-  	_chunk: _chunk,
-  	_keys: _keys,
-  	_allKeys: _allKeys,
-  	_values: _values,
-  	_mapObject: _mapObject,
-  	_pairs: _pairs,
-  	_invert: _invert,
-  	_methods: _methods,
-  	_functions: _functions,
-  	_extend: _extend,
-  	_extendOwn: _extendOwn,
-  	_assign: _assign,
-  	_findKey: _findKey,
-  	_pick: _pick,
-  	_omit: _omit,
-  	_defaults: _defaults,
-  	_create: _create,
-  	_clone: _clone,
-  	_tap: _tap,
-  	_isMatch: _isMatch,
-  	_isEqual: _isEqual,
-  	_isEmpty: _isEmpty,
-  	_isElement: _isElement,
-  	_isArray: _isArray,
-  	_isObject: _isObject,
-  	_isArguments: _isArguments,
-  	_isFunction: _isFunction,
-  	_isString: _isString,
-  	_isNumber: _isNumber,
-  	_isDate: _isDate,
-  	_isRegExp: _isRegExp,
-  	_isError: _isError,
-  	_isSymbol: _isSymbol,
-  	_isMap: _isMap,
-  	_isWeakMap: _isWeakMap,
-  	_isSet: _isSet,
-  	_isWeakSet: _isWeakSet,
-  	_isFinite: _isFinite,
-  	_isNaN: _isNaN,
-  	_isBoolean: _isBoolean,
-  	_isNull: _isNull,
-  	_isUndefined: _isUndefined,
-  	_has: _has,
-  	_bind: _bind,
-  	_partial: _partial,
-  	_bindAll: _bindAll,
-  	_memoize: _memoize,
-  	_delay: _delay,
-  	_defer: _defer,
-  	_throttle: _throttle,
-  	_debounce: _debounce,
-  	_wrap: _wrap,
-  	_negate: _negate,
-  	_compose: _compose,
-  	_after: _after,
-  	_before: _before,
-  	_once: _once,
-  	_restArgs: _restArgs,
-  	_identity: _identity,
-  	_constant: _constant,
-  	_noop: _noop,
-  	_property: _property,
-  	_propertyOf: _propertyOf,
-  	_matches: _matches,
-  	_matcher: _matcher,
-  	_times: _times,
-  	get _iteratee () { return _iteratee; },
-  	_setIteratee: _setIteratee,
-  	_random: _random,
-  	_now: _now,
-  	_escape: _escape,
-  	_unescape: _unescape,
-  	_result: _result,
-  	_uniqueId: _uniqueId,
-  	_template: _template
+
+  var utilityTools = Object.freeze({
+  	constant: constant,
+  	escape: _escape,
+  	identity: _identity,
+  	get iteratee () { return _iteratee; },
+  	setIteratee: _setIteratee,
+  	matcher: _matcher,
+  	matches: _matcher,
+  	noop: noop,
+  	now: _now,
+  	property: _property,
+  	propertyOf: propertyOf,
+  	random: _random,
+  	result: result,
+  	template: _template,
+  	times: times,
+  	unescape: _unescape,
+  	uniqueId: uniqueId
   });
 
   // Baseline setup
@@ -1794,13 +1851,17 @@
   // each native function start with _ so it will be removed 
   // because the gold is to have `_[.function]` not `_[._function]`
   var natifyMixin = function natifyMixin(obj) {
-  	_each(_functions(obj), function (name) {
-  		if (name !== '_' || name !== 'default') _[name.slice(1)] = obj[name];
+  	_each(methods(obj), function (name) {
+  		_[name] = obj[name];
   	});
   	return _;
   };
   // Add underscore's natives functions to the Underscore object.
-  natifyMixin(_tools);
+  natifyMixin(collectionTools);
+  natifyMixin(arrayTools);
+  natifyMixin(objectTools);
+  natifyMixin(functionTools);
+  natifyMixin(utilityTools);
 
   // Add a "chain" function. Start chaining a wrapped Underscore object.
   _.chain = function (obj) {
