@@ -5,5 +5,9 @@
 //     Underscore may be freely distributed under the MIT license.
 
 
-export * from './tools';
+export * from './_collections';
+export * from './_arrays';
+export * from './_objects';
+export * from './_functions';
+export * from './_utilities';
 export {default} from './namespace';
