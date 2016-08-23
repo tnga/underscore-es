@@ -45,6 +45,7 @@ export function builtinIteratee (value, context) {
 // An internal function to generate callbacks that can be applied to each
 // element in a collection, returning the desired result — either `identity`,
 // an arbitrary callback, a property matcher, or a property accessor.
+// @TODO change _property to property
 export function cb (value, context, argCount) {
 	if (_iteratee !== builtinIteratee) return _iteratee(value, context);
 	if (value == null) return _identity;
