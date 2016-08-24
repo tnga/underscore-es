@@ -17,8 +17,6 @@ without extending any core JavaScript objects.
 
 - partial importation of features (just import what you need, with a name that suits you).
 
- (*__nb__: only `_chain` isn't available in this case*)
-
  ```js
 import _template from 'underscore-es/template';
 
@@ -27,15 +25,36 @@ import _template from 'underscore-es/template';
  console.log( result ); 
  // => "Ok, i use rollup for my es6 and beyond stuff !"
  ```
+ *__nb__: only `_chain` isn't available in this case.* <br/> 
+ *another way to use chaining feature here is through `_compose` or `_use`.*
+ ```js
+ import _use from 'underscore-es/use';
+ import _initial from 'underscore-es/initial';
+ import _filter from 'underscore-es/filter';
+ import _union from 'underscore-es/union';
+ import _last from 'underscore-es/last';
+
+ function note (num) {return 'result: '+ (num + 10) + " / 20"}
+ var test = _use([1, 2, 3, 6, 9])
+           .do(_union, [1, 3, 11], [2, 6, 10, 14])
+           .do(_filter, (num) => num % 2 == 0)
+           .do(_initial)
+           .do(_last)
+           .do(note)
+           .value();
+ console.log( test );
+ // => result: 20 / 20
+ ```
+ 
  *import features depending of their category*
  ```js
- import * as _$co from 'underscore-es/_collections';
- import * as _$ar from 'underscore-es/_arrays';
- import * as _$ob from 'underscore-es/_objects';
- import * as _$fu from 'underscore-es/_functions';
- import * as _$ut from 'underscore-es/_utilities';
+ import * as $co from 'underscore-es/_collections';
+ import * as $ar from 'underscore-es/_arrays';
+ import * as $ob from 'underscore-es/_objects';
+ import * as $fu from 'underscore-es/_functions';
+ import * as $ut from 'underscore-es/_utilities';
  
- console.log( _$ar.union([4,7], [7,0,3]) );
+ console.log( $ar._union([4,7], [7,0,3]) );
  // => [4, 7, 0, 3]
  ```
  
