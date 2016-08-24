@@ -1,12 +1,15 @@
 {
-  "name": "underscore-es",
-  "description": "javaScript's functional programming helper library ; even for ES6 and beyond.",
+  "name": "underscore",
+  "description": "javaScript's functional programming helper library available for ES6 and umd usage.",
   "homepage": "http://underscorejs.org",
   "keywords": [
     "util",
     "functional",
+    "helper",
     "server",
     "client",
+    "es6",
+    "es2015",
     "browser"
   ],
   "author": "Jeremy Ashkenas <jeremy@documentcloud.org>",
