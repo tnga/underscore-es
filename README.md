@@ -15,7 +15,7 @@ without extending any core JavaScript objects.
 
 **ES6 & Beyond usage**:
 
-- partial importation of features (just call the function's name prefixed by `_`).
+- partial importation of features (just import what you need, with a name that suits you).
 
  (*__nb__: only `_chain` isn't available in this case*)
 
@@ -27,10 +27,22 @@ import _template from 'underscore-es/template';
  console.log( result ); 
  // => "Ok, i use rollup for my es6 and beyond stuff !"
  ```
+ *import features depending of their category*
+ ```js
+ import * as _$co from 'underscore-es/_collections';
+ import * as _$ar from 'underscore-es/_arrays';
+ import * as _$ob from 'underscore-es/_objects';
+ import * as _$fu from 'underscore-es/_functions';
+ import * as _$ut from 'underscore-es/_utilities';
+ 
+ console.log( _$ar.union([4,7], [7,0,3]) );
+ // => [4, 7, 0, 3]
+ ```
+ 
 - global importation of all features
 
  ```js
- import _ from 'underscore-es';
+ import _ from 'underscore-es'; // or from 'underscore-es/_namespace'
  
  _.chain([4,7])
   .union([7,0,3])
@@ -40,6 +52,7 @@ import _template from 'underscore-es/template';
   .value()
   // => 0
  ```
+ 
 - breaking changes
 
  Since this underscore source code has been rewritten to be more es6 friendly :
@@ -57,7 +70,7 @@ import _template from 'underscore-es/template';
  var custom = _template('<ul>{{ for (var key in people) { }}<li>{{= people[key] }}</li>{{ } }}</ul>');
  var result = custom({people: {moe: 'Moe', larry: 'Larry', curly: 'Curly'}});
  console.log( result );
- //=> <ul><li>Moe</li><li>Larry</li><li>Curly</li></ul>
+ // => <ul><li>Moe</li><li>Larry</li><li>Curly</li></ul>
  ```
  *the `_.iteratee` shall now (for global importation) be overwritten through `_.setIteratee([fn])` method*
  ```js
@@ -78,17 +91,15 @@ import _template from 'underscore-es/template';
  // test some methods that claim to be transformed through `_iteratee`
  var collection = ['foo', 'bar', 'bbiz'];
  console.log(_countBy(collection, /b/g))
- //=> {0: 1, 1: 1, 2: 1}
+ // => {0: 1, 1: 1, 2: 1}
  console.log(_filter(collection, /b/g))
- //=> ['bar', 'bbiz']
+ // => ['bar', 'bbiz']
  ```
  
 [Documentation](https://tnga.github.io/underscore-es) is the place to find what you need to know !
 
 This project adheres to a [code of conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
 
-For Docs, License, Tests, and pre-packed downloads, see:
-http://underscorejs.org
 
 For support and questions, please use
 [the gitter channel](https://gitter.im/jashkenas/underscore)
@@ -98,4 +109,5 @@ Underscore is an open-sourced component of DocumentCloud:
 https://github.com/documentcloud
 
 Many thanks to our contributors:
+https://github.com/tnga/underscore-es/contributors
 https://github.com/jashkenas/underscore/contributors
