@@ -218,10 +218,12 @@ export function executeBound (sourceFunc, boundFunc, context, callingContext, ar
 }
 
 // Keys in IE < 9 that won't be iterated by `for key in ...` and thus missed.
+// @TODO move to _quickaccess to prevent inappropriate cyclic dependency with `keys` and `allkeys`
+// @FUTURE remove this hack when the will ignore IE<9 since the goal is now ES6 and beyond.
 export var hasEnumBug = !{toString: null}.propertyIsEnumerable('toString');
 export var nonEnumerableProps = ['valueOf', 'isPrototypeOf', 'toString',
                       'propertyIsEnumerable', 'hasOwnProperty', 'toLocaleString'];
-// hack for enumeratin bug
+// hack for enumerating bug
 export function collectNonEnumProps (obj, keys) {
 	let nonEnumIdx = nonEnumerableProps.length;
 	let constructor = obj.constructor;
