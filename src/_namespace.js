@@ -19,8 +19,8 @@ var _ = __;
 // each native function start with _ so it will be removed 
 // because the gold is to have `_[.function]` not `_[._function]`
 let natifyMixin = function (obj) {
-	collectionTools.each( objectTools.functions(obj), (name) => {
-		_[name] = obj[name];
+	collectionTools._each( objectTools._functions(obj), (name) => {
+		_[name.slice(1)] = obj[name];
 	});
 	return _;
 };
