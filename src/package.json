@@ -19,6 +19,6 @@
   },
   "module": "src/_namespace.js",
   "jsnext:main": "src/_namespace.js",
-  "version": "1.8.3-r0",
+  "version": "1.9.0",
   "license": "MIT"
 }

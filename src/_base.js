@@ -8,6 +8,6 @@ function _ (obj) {
 	this._wrapped = obj;
 }
 // Current version.
-_.VERSION = '1.8.3';
+_.VERSION = '1.9.0';
 
 export {_ as default}; // @important: exportation of the function, not only it definition
