@@ -6,7 +6,7 @@ import _drop from './drop';
 
 // function for chaining intermediate results.
 // it return an object that has a method `do`,
-// which can be use to pipe current result to others functions.
+// which can be used to pipe current result to other functions.
 // method `value` can be used to get the "final result".
 export default function (obj) {
 	let chainObj = function () {
