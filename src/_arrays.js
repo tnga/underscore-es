@@ -3,8 +3,8 @@
 
 export {default as chunk} from './chunk';
 export {default as compact} from './compact';
-export {default as difference} from './difference';
 export {default as drop} from './drop';
+export {default as difference} from './difference';
 export {default as findIndex} from './findIndex';
 export {default as findLastIndex} from './findLastIndex';
 export {default as flatten} from './flatten';

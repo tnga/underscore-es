@@ -496,9 +496,11 @@ function executeBound(sourceFunc, boundFunc, context, callingContext, args) {
 }
 
 // Keys in IE < 9 that won't be iterated by `for key in ...` and thus missed.
+// @TODO move to _quickaccess to prevent inappropriate cyclic dependency with `keys` and `allkeys`
+// @FUTURE remove this hack when the will ignore IE<9 since the goal is now ES6 and beyond.
 var hasEnumBug = !{ toString: null }.propertyIsEnumerable('toString');
 var nonEnumerableProps = ['valueOf', 'isPrototypeOf', 'toString', 'propertyIsEnumerable', 'hasOwnProperty', 'toLocaleString'];
-// hack for enumeratin bug
+// hack for enumerating bug
 function collectNonEnumProps(obj, keys) {
 	var nonEnumIdx = nonEnumerableProps.length;
 	var constructor = obj.constructor;
@@ -1178,6 +1180,16 @@ function compact (array) {
 	return _filter(array, Boolean);
 }
 
+// `_drop` : an array's function
+// ------------------------------
+
+// Returns everything but the first entry of the array. Aliased as `tail` and `drop`.
+// Especially useful on the arguments object. Passing an **n** will return
+// the rest N values in the array.
+function _drop (array, n, guard) {
+	return slice.call(array, n == null || guard ? 1 : n);
+}
+
 // `_difference` : an array's function
 // ------------------------------------
 
@@ -1189,16 +1201,6 @@ var _difference = restArgs(function (array, rest) {
 		return !_contains(rest, value);
 	});
 });
-
-// `_drop` : an array's function
-// ------------------------------
-
-// Returns everything but the first entry of the array. Aliased as `tail` and `drop`.
-// Especially useful on the arguments object. Passing an **n** will return
-// the rest N values in the array.
-function _rest (array, n, guard) {
-	return slice.call(array, n == null || guard ? 1 : n);
-}
 
 // `_findLastIndex` : an array's function
 // ---------------------------------------
@@ -1242,7 +1244,7 @@ function intersection (array) {
 function last (array, n, guard) {
 	if (array == null || array.length < 1) return void 0;
 	if (n == null || guard) return array[array.length - 1];
-	return _rest(array, Math.max(0, array.length - n));
+	return _drop(array, Math.max(0, array.length - n));
 }
 
 // `_lastIndexOf` : an array's function
@@ -1378,8 +1380,8 @@ var _zip = restArgs(_unzip);
 var arrayTools = Object.freeze({
 	chunk: chunk,
 	compact: compact,
+	drop: _drop,
 	difference: _difference,
-	drop: _rest,
 	findIndex: _findIndex,
 	findLastIndex: _findLastIndex,
 	flatten: flatten$1,
@@ -1390,9 +1392,9 @@ var arrayTools = Object.freeze({
 	lastIndexOf: _lastIndexOf,
 	object: object,
 	range: range,
-	rest: _rest,
+	rest: _drop,
 	sortedIndex: _sortedIndex,
-	tail: _rest,
+	tail: _drop,
 	take: take,
 	union: _union,
 	uniq: _uniq,
@@ -1432,14 +1434,6 @@ function methods (obj) {
 	return names.sort();
 }
 
-// `_isDate` : an object's function
-// ---------------------------------
-
-// Is a given value a date?
-function isDate (obj) {
-	return toString.call(obj) === '[object Date]';
-}
-
 // `_isElement` : an object's function
 // ------------------------------------
 
@@ -1457,6 +1451,14 @@ function isEmpty (obj) {
 	if (obj == null) return true;
 	if (isArrayLike(obj) && (_isArray(obj) || _isString(obj) || _isArguments(obj))) return obj.length === 0;
 	return _keys(obj).length === 0;
+}
+
+// `_isDate` : an object's function
+// ---------------------------------
+
+// Is a given value a date?
+function isDate (obj) {
+	return toString.call(obj) === '[object Date]';
 }
 
 // `_isEqual` : an object's function
@@ -1523,20 +1525,20 @@ function isSet (obj) {
 	return toString.call(obj) === '[object Set]';
 }
 
-// `_isUndefined` : an object's function
-// --------------------------------------
-
-// Is a given variable undefined?
-function isUndefined (obj) {
-	return obj === void 0;
-}
-
 // `_isWeakMap` : an object's function
 // ------------------------------------
 
 // Is a given value a weak-map?
 function isWeakMap (obj) {
 	return toString.call(obj) === '[object WeakMap]';
+}
+
+// `_isUndefined` : an object's function
+// --------------------------------------
+
+// Is a given variable undefined?
+function isUndefined (obj) {
+	return obj === void 0;
 }
 
 // `_isWeakSet` : an object's function
@@ -1649,25 +1651,25 @@ var objectTools = Object.freeze({
 	isArguments: _isArguments,
 	isArray: _isArray,
 	isBoolean: _isBoolean,
-	isDate: isDate,
 	isElement: isElement,
 	isEmpty: isEmpty,
+	isDate: isDate,
 	isEqual: isEqual,
 	isError: isError,
-	isFinite: isFinite$1,
 	isFunction: _isFunction,
+	isFinite: isFinite$1,
 	isMap: isMap,
-	isMatch: _isMatch,
 	isNaN: _isNaN,
+	isMatch: _isMatch,
 	isNull: isNull,
-	isNumber: _isNumber,
 	isObject: _isObject,
+	isNumber: _isNumber,
 	isRegExp: isRegExp,
 	isSet: isSet,
 	isString: _isString,
 	isSymbol: _isSymbol,
-	isUndefined: isUndefined,
 	isWeakMap: isWeakMap,
+	isUndefined: isUndefined,
 	isWeakSet: isWeakSet,
 	keys: _keys,
 	mapObject: mapObject,
@@ -1691,6 +1693,20 @@ function after (times, func) {
   };
 }
 
+// `_bind` : (ahem) a function's function
+// ---------------------------------------
+
+// Create a function bound to a given object (assigning `this`, and arguments,
+// optionally). Delegates to **ECMAScript 5**'s native `Function.bind` if
+// available.
+var _bind = restArgs(function (func, context, args) {
+  if (!_isFunction(func)) throw new TypeError('Bind must be called on a function');
+  var bound = restArgs(function (callArgs) {
+    return executeBound(func, bound, context, this, args.concat(callArgs));
+  });
+  return bound;
+});
+
 // `_before` : (ahem) a function's function
 // -----------------------------------------
 
@@ -1705,20 +1721,6 @@ function _before (times, func) {
     return memo;
   };
 }
-
-// `_bind` : (ahem) a function's function
-// ---------------------------------------
-
-// Create a function bound to a given object (assigning `this`, and arguments,
-// optionally). Delegates to **ECMAScript 5**'s native `Function.bind` if
-// available.
-var _bind = restArgs(function (func, context, args) {
-  if (!_isFunction(func)) throw new TypeError('Bind must be called on a function');
-  var bound = restArgs(function (callArgs) {
-    return executeBound(func, bound, context, this, args.concat(callArgs));
-  });
-  return bound;
-});
 
 // `_bindAll` : (ahem) a function's function
 // -------------------------------------------
@@ -1753,6 +1755,30 @@ function compose () {
   };
 }
 
+// `_partial` : (ahem) a function's function
+// ------------------------------------------
+
+// Partially apply a function by creating a version that has had some of its
+// arguments pre-filled, without changing its dynamic `this` context. _ acts
+// as a placeholder by default, allowing any combination of arguments to be
+// pre-filled. Set `_.partial.placeholder` for a custom placeholder argument.
+var _partial = restArgs(function (func, boundArgs) {
+  var placeholder = _partial.placeholder;
+  var bound = function bound() {
+    var position = 0,
+        length = boundArgs.length;
+    var args = Array(length);
+    for (var i = 0; i < length; i++) {
+      args[i] = boundArgs[i] === placeholder ? arguments[position++] : boundArgs[i];
+    }
+    while (position < arguments.length) {
+      args.push(arguments[position++]);
+    }return executeBound(func, bound, this, this, args);
+  };
+  return bound;
+});
+_partial.placeholder = _$1;
+
 // `_delay` : (ahem) a function's function
 // ----------------------------------------
 
@@ -1763,6 +1789,12 @@ var _delay = restArgs(function (func, wait, args) {
     return func.apply(null, args);
   }, wait);
 });
+
+// `_defer` : (ahem) a function's function
+// ----------------------------------------
+
+// Defers a function, scheduling it to run after the current call stack has cleared.
+var _defer = _partial(_delay, _partial.placeholder, 1);
 
 // `_debounce` : (ahem) a function's function
 // -------------------------------------------
@@ -1800,36 +1832,6 @@ function debounce (func, wait, immediate) {
 
   return debounced;
 }
-
-// `_partial` : (ahem) a function's function
-// ------------------------------------------
-
-// Partially apply a function by creating a version that has had some of its
-// arguments pre-filled, without changing its dynamic `this` context. _ acts
-// as a placeholder by default, allowing any combination of arguments to be
-// pre-filled. Set `_.partial.placeholder` for a custom placeholder argument.
-var _partial = restArgs(function (func, boundArgs) {
-  var placeholder = _partial.placeholder;
-  var bound = function bound() {
-    var position = 0,
-        length = boundArgs.length;
-    var args = Array(length);
-    for (var i = 0; i < length; i++) {
-      args[i] = boundArgs[i] === placeholder ? arguments[position++] : boundArgs[i];
-    }
-    while (position < arguments.length) {
-      args.push(arguments[position++]);
-    }return executeBound(func, bound, this, this, args);
-  };
-  return bound;
-});
-_partial.placeholder = _$1;
-
-// `_defer` : (ahem) a function's function
-// ----------------------------------------
-
-// Defers a function, scheduling it to run after the current call stack has cleared.
-var _defer = _partial(_delay, _partial.placeholder, 1);
 
 // `_memoize` : (ahem) a function's function
 // ------------------------------------------
@@ -1913,6 +1915,33 @@ function throttle (func, wait, options) {
   return throttled;
 }
 
+// `_use` : (ahem) a function's function
+// ---------------------------------------
+
+// function for chaining intermediate results.
+// it return an object that has a method `do`,
+// which can be use to pipe current result to others functions.
+// method `value` can be used to get the "final result".
+function use (obj) {
+	var chainObj = function chainObj() {
+		var value = obj;
+		this.do = function () {
+			var args = arguments;
+			var func = args.length > 0 ? args[0] : _identity;
+			args = _drop(args);
+			args.unshift(value);
+			value = func.apply(this, args);
+			return this;
+		};
+		this.value = function () {
+			return value;
+		};
+		return this;
+	};
+
+	return new chainObj();
+}
+
 // `_wrap` : (ahem) a function's function
 // ---------------------------------------
 
@@ -1927,19 +1956,20 @@ function wrap (func, wrapper) {
 
 var functionTools = Object.freeze({
 	after: after,
-	before: _before,
 	bind: _bind,
+	before: _before,
 	bindAll: _bindAll,
 	compose: compose,
-	debounce: debounce,
 	defer: _defer,
+	debounce: debounce,
 	delay: _delay,
 	memoize: memoize,
 	negate: _negate,
-	once: _once,
 	partial: _partial,
+	once: _once,
 	restArgs: restArgs,
 	throttle: throttle,
+	use: use,
 	wrap: wrap
 });
 
@@ -2090,10 +2120,10 @@ var utilityTools = Object.freeze({
 	identity: _identity,
 	get iteratee () { return _iteratee; },
 	setIteratee: _setIteratee,
-	matcher: _matcher,
 	matches: _matcher,
-	noop: noop,
+	matcher: _matcher,
 	now: _now,
+	noop: noop,
 	property: _property,
 	propertyOf: propertyOf,
 	random: _random,
