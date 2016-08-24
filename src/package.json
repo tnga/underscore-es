@@ -1,0 +1,24 @@
+{
+  "name": "underscore-es",
+  "description": "javaScript's functional programming helper library for ES6 and beyond.",
+  "homepage": "https://tnga.github.io/underscore-es",
+  "keywords": [
+    "util",
+    "functional",
+    "helper",
+    "server",
+    "client",
+    "es6",
+    "es2015",
+    "browser"
+  ],
+  "author": "Jeremy Ashkenas <jeremy@documentcloud.org>",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/tnga/underscore-es.git"
+  },
+  "module": "src/_namespace.js",
+  "jsnext:main": "src/_namespace.js",
+  "version": "1.8.3-r0",
+  "license": "MIT"
+}
