@@ -17,8 +17,8 @@
     "type": "git",
     "url": "git://github.com/tnga/underscore-es.git"
   },
-  "module": "src/_namespace.js",
-  "jsnext:main": "src/_namespace.js",
+  "module": "_index.js",
+  "jsnext:main": "_index.js",
   "version": "1.9.0",
   "license": "MIT"
 }
