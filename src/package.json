@@ -19,6 +19,6 @@
   },
   "module": "_index.js",
   "jsnext:main": "_index.js",
-  "version": "1.9.1",
+  "version": "1.9.3",
   "license": "MIT"
 }
