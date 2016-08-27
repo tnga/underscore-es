@@ -603,6 +603,9 @@
     QUnit.test('isElement', function(assert) {
       assert.notOk(_.isElement('div'), 'strings are not dom elements');
       assert.ok(_.isElement(testElement), 'an element is a DOM element');
+      assert.ok(_.isElement(document.body, 'HTML'), 'an element can be a HTML, SVG, ... element');
+      assert.ok(_.isElement(document.body, 'HTMLBody'), 'an element is a particular DOM element');
+      assert.notOk(_.isElement(document.head, 'HTMLBody'), 'some DOM element can not have the same particular type');
     });
   }
 

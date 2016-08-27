@@ -277,7 +277,7 @@ function _$1(obj) {
 	this._wrapped = obj;
 }
 // Current version.
-_$1.VERSION = '1.8.3';
+_$1.VERSION = '1.9.1';
 
 // Internal functions
 //--------------------
@@ -1457,8 +1457,9 @@ function _isDate (obj) {
 // ------------------------------------
 
 // Is a given value a DOM element?
-function _isElement (obj) {
-	return !!(obj && obj.nodeType === 1);
+function _isElement (obj, eltName) {
+	var isInstanceOk = _isString(eltName) ? ['HTML', 'SVG'].indexOf(eltName) != -1 ? toString.call(obj).indexOf('[object ' + eltName) != -1 : toString.call(obj) === '[object ' + eltName + 'Element]' : true;
+	return !!(obj && obj.nodeType === 1 && isInstanceOk);
 }
 
 // `_isEqual` : an object's function
@@ -1920,7 +1921,7 @@ function _throttle (func, wait, options) {
 
 // function for chaining intermediate results.
 // it return an object that has a method `do`,
-// which can be use to pipe current result to others functions.
+// which can be used to pipe current result to other functions.
 // method `value` can be used to get the "final result".
 function _use (obj) {
 	var chainObj = function chainObj() {
