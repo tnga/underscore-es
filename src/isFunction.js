@@ -1,6 +1,8 @@
 // `_isFunction` : an object's function
 // -------------------------------------
 
+import {toString} from './_quickaccess';
+
 // Optimize `isFunction` if appropriate. Work around some typeof bugs in old v8,
 // IE 11 (#1621), Safari 8 (#1929), and PhantomJS (#2236).
 function customFunction() {

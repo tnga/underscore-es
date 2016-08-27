@@ -25,7 +25,7 @@ var SymbolProto = typeof Symbol !== 'undefined' ? Symbol.prototype : null;
 // Create quick reference variables for speed access to core prototypes.
 var push = ArrayProto.push;
 var slice = ArrayProto.slice;
-var toString$1 = ObjProto.toString;
+var toString = ObjProto.toString;
 var hasOwnProperty = ObjProto.hasOwnProperty;
 
 // All **ECMAScript 5** native function implementations that we hope to use
@@ -564,8 +564,8 @@ function deepEq(a, b, aStack, bStack) {
 	if (a instanceof _$1) a = a._wrapped;
 	if (b instanceof _$1) b = b._wrapped;
 	// Compare `[[Class]]` names.
-	var className = toString$1.call(a);
-	if (className !== toString$1.call(b)) return false;
+	var className = toString.call(a);
+	if (className !== toString.call(b)) return false;
 	switch (className) {
 		// Strings, numbers, regular expressions, dates, and booleans are compared by value.
 		case '[object RegExp]':

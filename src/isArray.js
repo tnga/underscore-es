@@ -1,7 +1,7 @@
 // `_isArray` : an object's function
 // ----------------------------------
 
-import {nativeIsArray} from './_quickaccess';
+import {nativeIsArray, toString} from './_quickaccess';
 
 // Is a given value an array?
 // Delegates to ECMA5's native Array.isArray

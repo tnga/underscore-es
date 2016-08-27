@@ -2,6 +2,7 @@
 // --------------------------------------
 
 import _has from './has';
+import {toString} from './_quickaccess';
 
 // Define a fallback version of the method in browsers (ahem, IE < 9), where
 // there isn't any inspectable "Arguments" type.

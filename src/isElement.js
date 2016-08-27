@@ -2,6 +2,7 @@
 // ------------------------------------
 
 import _isString from './isString';
+import {toString} from './_quickaccess';
 
 // Is a given value a DOM element?
 export default function (obj, eltName) {
