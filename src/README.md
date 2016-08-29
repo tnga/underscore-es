@@ -93,8 +93,7 @@ import _template from 'underscore-es/template';
  ```
  *the `_.iteratee` shall now (for global importation) be overwritten through `_.setIteratee([fn])` method*
  ```js
- import _iteratee from './underscore-es/iteratee';
- import _setIteratee from './underscore-es/iteratee';
+ import _iteratee, {_setIteratee} from './underscore-es/iteratee';
  import _countBy from './underscore-es/countBy';
  import _isRegExp from './underscore-es/isRegExp';
  import _filter from './underscore-es/filter';
