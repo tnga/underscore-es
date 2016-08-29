@@ -20,7 +20,7 @@
   "main": "underscore.js",
   "module": "src/_index.js",
   "jsnext:main": "src/_index.js",
-  "version": "1.9.3",
+  "version": "1.9.4",
   "devDependencies": {
     "babel": "^6.5.2",
     "babel-cli": "^6.11.4",
