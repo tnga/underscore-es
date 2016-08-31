@@ -10,7 +10,7 @@ import _drop from './drop';
 // which can be used to pipe current result to other functions.
 // method `value` can be used to get the "final result".
 export default function (obj) {
-	let chainObj = function () {
+	let Chainhub = function () {
 		let value = obj;
 		this.do = function () {
 			let args = arguments;
@@ -26,5 +26,5 @@ export default function (obj) {
 		return this;
 	}
 	
-	return new chainObj();
+	return new Chainhub();
 }
