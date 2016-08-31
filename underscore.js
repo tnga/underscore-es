@@ -1,4 +1,4 @@
-//     Underscore.js 1.8.3 
+//     Underscore.js 1.9.7 
 //     http://underscorejs.org 
 //     (c) 2009-2016 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors 
 //     Underscore may be freely distributed under the MIT license.
@@ -1924,7 +1924,7 @@ function _throttle (func, wait, options) {
 // which can be used to pipe current result to other functions.
 // method `value` can be used to get the "final result".
 function _use (obj) {
-	var chainObj = function chainObj() {
+	var Chainhub = function Chainhub() {
 		var value = obj;
 		this.do = function () {
 			var args = arguments;
@@ -1942,7 +1942,7 @@ function _use (obj) {
 		return this;
 	};
 
-	return new chainObj();
+	return new Chainhub();
 }
 
 // `_wrap` : (ahem) a function's function

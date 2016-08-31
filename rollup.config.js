@@ -8,7 +8,7 @@ export default {
 	format: 'umd',
 	plugins: [babel()],
 	dest: 'underscore.js',
-	banner: '//     Underscore.js 1.8.3 \n' +
+	banner: '//     Underscore.js 1.9.7 \n' +
 					'//     http://underscorejs.org \n' +
 					'//     (c) 2009-2016 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors \n' +
 					'//     Underscore may be freely distributed under the MIT license.\n'

@@ -36,7 +36,8 @@ import _template from 'underscore-es/template';
 
  function note (num) {return 'result: '+ (num + 10) + " / 20"}
  var test = _use([1, 2, 3, 6, 9])
-           .do(_union, [1, 3, 11], [2, 6, 10, 14])
+           .do(_union, [1, 3, 11], [2, 6])
+           .do([], Array.prototype.concat, [10, 14]) // or simply .do([], [].concat, [10, 14])
            .do(_filter, (num) => num % 2 == 0)
            .do(_initial)
            .do(_last)
