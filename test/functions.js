@@ -656,13 +656,14 @@
 
     var note = function(num){return 'result: '+ (num + 10) + " / 20";};
     var test = _.use([1, 2, 3, 6, 9])
-              .do(_.union, [1, 3, 11], [2, 6, 10, 14])
+              .do(_.union, [1, 3, 11], [2, 6])
+              .do([], Array.prototype.concat, [10, 14]) // or simply .do([], [].concat, [10, 14])
               .do(_.filter, function(num){ return num % 2 == 0;})
               .do(_.initial)
               .do(_.last)
               .do(note)
               .value();
-    assert.equal(test, 'result: 20 / 20', 'can chain functions with complementary arguments');
+    assert.equal(test, 'result: 20 / 20', 'can chain functions with context and complementary arguments');
   });
 
   QUnit.test('after', function(assert) {

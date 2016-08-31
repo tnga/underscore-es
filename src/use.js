@@ -1,6 +1,7 @@
 // `_use` : (ahem) a function's function
 // ---------------------------------------
 
+import _isFunction from './isFunction.js';
 import _identity from './identity';
 import _drop from './drop';
 
@@ -13,10 +14,12 @@ export default function (obj) {
 		let value = obj;
 		this.do = function () {
 			let args = arguments;
-			let func = args.length > 0 ? args[0] : _identity;
+			let context = args[0]; 
+			if (!_isFunction(context)) args = _drop(args); else context = this;
+			let func = args[0] || _identity;
 			args = _drop(args);
 			args.unshift(value);
-			value = func.apply(this, args);
+			value = func.apply(context, args);
 			return this;
 		};
 		this.value = () => value;
