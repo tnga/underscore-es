@@ -1,5 +1,5 @@
 // `_` : base namespace and constructor for underscore's object
-// -------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------
 
 // Baseline setup
 function _ (obj) {
@@ -8,6 +8,6 @@ function _ (obj) {
 	this._wrapped = obj;
 }
 // Current version.
-_.VERSION = '1.9.1';
+_.VERSION = '1.9.8';
 
 export {_ as default}; // @important: exportation of the function, not only it definition
