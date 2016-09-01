@@ -1,4 +1,4 @@
-//     Underscore.js 1.9.7 
+//     Underscore.js 1.9.8 
 //     http://underscorejs.org 
 //     (c) 2009-2016 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors 
 //     Underscore may be freely distributed under the MIT license.
@@ -268,7 +268,7 @@ function _matcher (attrs) {
 }
 
 // `_` : base namespace and constructor for underscore's object
-// -------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------
 
 // Baseline setup
 function _$1(obj) {
@@ -277,7 +277,7 @@ function _$1(obj) {
 	this._wrapped = obj;
 }
 // Current version.
-_$1.VERSION = '1.9.1';
+_$1.VERSION = '1.9.8';
 
 // Internal functions
 //--------------------
